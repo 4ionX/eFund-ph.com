@@ -48,3 +48,78 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+🧾 Conventional Commit Types
+
+This project follows the Conventional Commits specification to maintain consistent and readable commit history.
+
+✨ feat
+
+New feature
+
+Adds new functionality or feature
+Includes new screens, APIs, or user-facing capabilities
+🐛 fix
+
+Bug fix
+
+Fixes errors or unexpected behavior
+Resolves UI or logic issues
+🧹 chore
+
+Maintenance / housekeeping
+
+Non-feature changes
+Dependency updates, config changes, cleanup tasks
+📚 docs
+
+Documentation only
+
+Changes to README or documentation files
+No production code changes
+🎨 style
+
+Code style / formatting
+
+White-space, formatting, linting
+No logic changes
+♻️ refactor
+
+Code restructuring
+
+Improves code structure without changing behavior
+Enhances readability or maintainability
+⚡ perf
+
+Performance improvements
+
+Optimizes speed or resource usage
+Improves query or rendering efficiency
+🧪 test
+
+Testing
+
+Adds or updates tests
+Unit, integration, or e2e tests
+🏗️ build
+
+Build system changes
+
+Changes affecting build process or dependencies
+Expo, bundler, or native build configs
+🔄 ci
+
+Continuous Integration
+
+Updates CI/CD workflows
+GitHub Actions, pipelines, deployment scripts
+⏪ revert
+
+Revert changes
+
+Reverts a previous commit
+📌 Example Commit Format
+feat: add loan application form
+fix: resolve login crash on invalid token
+chore: update dependencies
+refactor: simplify authentication flow

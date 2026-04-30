@@ -1,0 +1,89 @@
+import { useAuthStore } from '@/store/auth.store';
+import { usePersonalInformationStore } from '@/store/personalInformation.store';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { Alert } from 'react-native';
+import type { PersonalInformation } from '../types/personal-information';
+import { createPersonalInformation } from '../api/personalInformation.mutations';
+import { PersonalInformationSchema } from '../validations/personalInformation.validation';
+
+export const usePersonalInformationForm = ({
+  initialData,
+}: {
+  initialData?: PersonalInformation;
+}) => {
+  const { user } = useAuthStore();
+  const [formData, setFormData] = useState<PersonalInformation>(
+    initialData ?? {
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      birthDate: '',
+      civilStatus: 'Single',
+      lengthOfStay: '',
+      presentAddress: '',
+      previousAddress: '',
+      primaryContactNumber: '',
+      secondaryContactNumber: '',
+      sourceOfIncome: '',
+      socialMediaLink: '',
+    },
+  );
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const { setPersonalInfo } = usePersonalInformationStore();
+  const isLocked = !!initialData;
+
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (data: PersonalInformation) => {
+      if (!user) throw new Error('User not authenticated');
+      return createPersonalInformation(data, user.id);
+    },
+    onSuccess: (savedData: PersonalInformation) => {
+      queryClient.invalidateQueries({
+        queryKey: ['documents'],
+      });
+      setPersonalInfo(savedData);
+      router.back();
+    },
+    onError: (err: any) => {
+      console.log(err);
+      Alert.alert('Cannot Create', 'Something went wrong', [{ text: 'OK' }]);
+    },
+  });
+
+  const handleChange = useCallback(
+    (key: keyof PersonalInformation, value: string) => {
+      setFormData((prev) => ({ ...prev, [key]: value }));
+      setErrors((prev) => ({ ...prev, [key]: '' }));
+    },
+    [],
+  );
+
+  const handleSave = useCallback(() => {
+    const result = PersonalInformationSchema.safeParse(formData);
+    if (!result.success) {
+      const formattedErrors: Record<string, string> = {};
+      result.error.issues.forEach((err) => {
+        if (err.path[0]) formattedErrors[err.path[0] as string] = err.message;
+      });
+      setErrors(formattedErrors);
+      return;
+    }
+    mutation.mutate(result.data as PersonalInformation);
+  }, [formData, mutation]);
+
+  return {
+    formData,
+    errors,
+    showDatePicker,
+    isLocked,
+    setShowDatePicker,
+    handleChange,
+    handleSave,
+    isLoading: mutation.isPending,
+  };
+};

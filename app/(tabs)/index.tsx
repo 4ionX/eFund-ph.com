@@ -1,98 +1,234 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import AboutCard from '@/features/home/components/AboutCard';
+import ProcessCard from '@/features/home/components/ProcessCard';
+import { ThemedSafeAreaView } from '@/shared/components/theme/ThemedSafeAreaView';
+import { ThemedText } from '@/shared/components/theme/ThemedText';
+import { ThemedView } from '@/shared/components/theme/ThemedView';
+import AnimatedButton from '@/shared/components/ui/AnimatedButton';
+import AnimatedCard from '@/shared/components/ui/HapticCard';
+import StickyHeader from '@/shared/components/ui/StickyHeader';
+import { Colors, IconSize, Radius, Spacing } from '@/shared/constants/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { Field } from '@/shared/components/ui/Field';
+
+import { useAuthStore } from '@/store/auth.store';
+import { useNavigationLock } from '@/shared/hooks/ui/useNavigationLock';
+import { useFetchCoBorrowers } from '@/features/account/hooks/useFetchCoBorrower';
+import { useFetchPersonalInformation } from '@/features/account/hooks/useFetchPersonalInformation';
+import { useLoanNavigation } from '@/features/home/hooks/useLoanNavigation';
+import { useFetchContactReference } from '@/features/account/hooks/useFetchContactReference';
+import { useFetchDocuments } from '@/features/account/hooks/useFetchDocuments';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const { user } = useAuthStore();
+  const { isLoading: personalInfoLoading, refetch: refetchPersonal } =
+    useFetchPersonalInformation(user?.id);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
+  const { isLoading: coBorrowerLoading, refetch: refetchCoBorrower } =
+    useFetchCoBorrowers(user?.id);
+
+  const { isLoading: contactReferenceLoading, refetch: refetchContact } =
+    useFetchContactReference(user?.id);
+
+  const { isLoading: documentsLoading, refetch: refetchDocuments } =
+    useFetchDocuments(user?.id);
+  const { handleApplyNow } = useLoanNavigation();
+  const safeNavigate = useNavigationLock();
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const fetchAll = async () => {
+      try {
+        await Promise.all([
+          refetchPersonal?.(),
+          refetchCoBorrower?.(),
+          refetchContact?.(),
+          refetchDocuments?.(),
+        ]);
+      } catch (err) {
+        console.log('Refetch error:', err);
+      }
+    };
+
+    fetchAll();
+  }, [
+    refetchCoBorrower,
+    refetchContact,
+    refetchDocuments,
+    refetchPersonal,
+    user?.id,
+  ]);
+
+  return (
+    <ThemedSafeAreaView style={styles.container}>
+      <ThemedView style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          stickyHeaderIndices={[0]}
+        >
+          <StickyHeader title="eFund" rightIcon="notifications-outline" />
+          <Field>
+            <AnimatedCard>
+              <ThemedText type="defaultSemiBold">Loan Offer</ThemedText>
+              <ThemedText type="caption">
+                Apply now and get approved in minutes.
+              </ThemedText>
+
+              <View style={styles.offerBox}>
+                <View style={styles.offerRow}>
+                  <View style={styles.offerItem}>
+                    <Ionicons
+                      name="calculator-outline"
+                      size={IconSize.lg}
+                      color={Colors.brand.primary}
+                    />
+                    <ThemedText type="caption">Low interest rate</ThemedText>
+                  </View>
+
+                  <View style={styles.offerItem}>
+                    <Ionicons
+                      name="calendar-outline"
+                      size={IconSize.lg}
+                      color={Colors.brand.primary}
+                    />
+                    <ThemedText type="caption">Flexible terms</ThemedText>
+                  </View>
+
+                  <View style={styles.offerItem}>
+                    <Ionicons
+                      name="time-outline"
+                      size={IconSize.lg}
+                      color={Colors.brand.primary}
+                    />
+                    <ThemedText type="caption">Within 1 day</ThemedText>
+                  </View>
+                </View>
+              </View>
+
+              <ThemedText type="caption" style={styles.caption}>
+                Loan amount may increase for repeat borrowers with good payment
+                history.
+              </ThemedText>
+              {personalInfoLoading ||
+              coBorrowerLoading ||
+              documentsLoading ||
+              contactReferenceLoading ? (
+                <ActivityIndicator
+                  size={IconSize['3xl']}
+                  color={Colors.brand.primary}
+                  style={{ marginTop: Spacing.md }}
+                />
+              ) : (
+                <AnimatedButton
+                  label="Apply Now"
+                  disabled={personalInfoLoading || coBorrowerLoading}
+                  onPress={() => handleApplyNow()}
+                />
+              )}
+            </AnimatedCard>
+          </Field>
+          <Field>
+            <View style={styles.sectionHeader}>
+              <ThemedText type="subtitle">Loan Process</ThemedText>
+              <View style={styles.row}>
+                <Pressable
+                  onPress={() =>
+                    safeNavigate(() => router.push('/guidelines/loan-steps'))
+                  }
+                >
+                  <ThemedText style={styles.linkText} type="caption">
+                    How to loan?
+                  </ThemedText>
+                </Pressable>
+                <Ionicons
+                  name="chevron-forward"
+                  size={14}
+                  color={Colors.brand.primary}
+                  style={{ marginLeft: 4 }}
+                />
+              </View>
+            </View>
+
+            <ProcessCard />
+          </Field>
+          <Field>
+            <View style={styles.sectionHeader}>
+              <ThemedText type="subtitle">About</ThemedText>
+            </View>
+
+            <AboutCard />
+          </Field>
+        </ScrollView>
+
+        {/* Bottom Sheet Login */}
+        {/* <DynamicBottomSheet
+          visible={openSheet}
+          setVisible={setOpenSheet}
+          initialSnapHeight="80%"
+          maxSnapHeight="80%"
+          type="default"
+        >
+          <LoginForm setOpenSheet={setOpenSheet} />
+        </DynamicBottomSheet> */}
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    </ThemedSafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+  },
+
+  scrollContent: {
+    paddingVertical: Spacing.md,
+    paddingBottom: Spacing['2xl'],
+  },
+
+  offerBox: {
+    padding: Spacing.md,
+    borderRadius: Radius.md,
+    marginTop: Spacing.sm,
+    backgroundColor: Colors.brand.primary + '10',
+  },
+
+  offerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  offerItem: {
+    alignItems: 'center',
+  },
+
+  caption: {
+    marginTop: Spacing.sm,
+  },
+
+  sectionHeader: {
+    flexDirection: 'row',
+    paddingHorizontal: Spacing.md,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+
+  linkText: {
+    color: Colors.brand.primary,
   },
 });

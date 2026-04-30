@@ -1,0 +1,13 @@
+appId: com.efund.app
+---
+- launchApp
+
+- tapOn: 'Email'
+- inputText: 'test@gmail.com'
+
+- tapOn: 'Password'
+- inputText: '123456'
+
+- tapOn: 'Sign In'
+
+- assertVisible: 'Welcome'
