@@ -14,7 +14,9 @@
     "format:check": "prettier --check .",
     "test": "jest",
     "prepare": "husky install",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "build:web": "expo export --platform web",
+    "start:web": "expo start --web"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
