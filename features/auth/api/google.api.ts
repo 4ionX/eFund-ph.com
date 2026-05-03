@@ -7,49 +7,38 @@ WebBrowser.maybeCompleteAuthSession();
 
 export const signInWithGoogle = async () => {
   try {
-    // ✅ Correct redirect URI
     const redirectUri = AuthSession.makeRedirectUri({
       scheme: 'efund',
       path: 'auth/callback',
     });
 
-    console.log('Redirect URI:', redirectUri);
-
-    // 🔐 Start OAuth request
     const { data, error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: redirectUri,
+        redirectTo:
+          Platform.OS === 'web' ? window.location.origin : redirectUri,
       },
     });
 
     if (error) throw error;
-    if (!data?.url) throw new Error('No OAuth URL returned');
+    if (!data?.url) throw new Error('No OAuth URL');
 
-    // 🌐 WEB handling (important fix)
+    // 🌐 WEB
     if (Platform.OS === 'web') {
       window.location.href = data.url;
       return;
     }
 
-    // 📱 MOBILE handling
+    // 📱 MOBILE
     const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUri);
 
     if (result.type !== 'success') {
       throw new Error('Login cancelled');
     }
 
-    // 🔥 FIX: Supabase already handles session internally
-    // No need to manually parse fragments anymore
+    const { data: session } = await supabaseClient.auth.getSession();
 
-    const { data: sessionData, error: sessionError } =
-      await supabaseClient.auth.getSession();
-
-    if (sessionError) throw sessionError;
-
-    console.log('✅ Current User:', sessionData.session?.user);
-
-    return sessionData.session?.user;
+    return session.session?.user;
   } catch (err: any) {
     console.error('Google login error:', err.message);
     throw err;

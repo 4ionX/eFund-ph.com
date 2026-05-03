@@ -1,11 +1,11 @@
 import { supabaseClient } from '@/core/api/supabaseClient';
-import * as AuthSession from 'expo-auth-session';
+import { Platform } from 'react-native';
 
 export const sendPasswordResetEmail = async (email: string) => {
-  const redirectTo = AuthSession.makeRedirectUri({
-    scheme: 'efund',
-    path: 'auth/reset-password',
-  });
+  const redirectTo =
+    Platform.OS === 'web'
+      ? `${window.location.origin}/auth/reset-password`
+      : 'efund://auth/reset-password';
 
   const { data, error } = await supabaseClient.auth.resetPasswordForEmail(
     email,
