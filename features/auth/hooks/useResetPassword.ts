@@ -17,17 +17,18 @@ export const useResetPassword = () => {
   const handleResetPassword = async () => {
     setErrors({});
 
-    // Prepare values
+    // validation
     const values: ResetPasswordSchema = { password, confirmPassword };
     const result = resetPasswordSchema.safeParse(values);
 
-    // Validation failed
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
+
       result.error.issues.forEach((err) => {
         const field = err.path[0];
         if (field) fieldErrors[String(field)] = err.message;
       });
+
       setErrors(fieldErrors);
       return;
     }
@@ -36,9 +37,15 @@ export const useResetPassword = () => {
 
     try {
       await updatePassword(password);
-      Alert.alert('Success', 'Your password has been updated!');
+
+      Alert.alert('Success', 'Your password has been updated successfully!');
+
+      // optional redirect after success
+      // router.replace('/auth/login');
     } catch (error: any) {
-      setErrors({ password: error.message });
+      setErrors({
+        password: error.message || 'Failed to update password',
+      });
     } finally {
       setLoading(false);
     }
