@@ -2,15 +2,15 @@ import { useAuthStore } from '@/store/auth.store';
 import { usePersonalInformationStore } from '@/store/personalInformation.store';
 import { useCoBorrowerStore } from '@/store/coBorrower.store';
 import { useContactReferenceStore } from '@/store/contactReference.store';
-
-import { useState } from 'react';
-import { Alert } from 'react-native';
-import { signOutApi } from '../api/signOut.api';
 import { useDocumentInformationStore } from '@/store/documents.store';
 import { useLoanApplications } from '@/store/loans.store';
 
+import { useState } from 'react';
+import { Platform } from 'react-native';
+import { signOutApi } from '../api/signOut.api';
+
 export const useLogout = () => {
-  // ✅ get resets here (top level)
+  // ✅ stores
   const { reset: authReset } = useAuthStore();
   const { reset: personalReset } = usePersonalInformationStore();
   const { reset: coBorrowerReset } = useCoBorrowerStore();
@@ -21,7 +21,7 @@ export const useLogout = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // ✅ use them here
+  // ✅ reset all stores
   const resetAllStores = () => {
     authReset();
     personalReset();
@@ -31,24 +31,44 @@ export const useLogout = () => {
     loanReset();
   };
 
+  // ✅ cross-platform alert helper
+  const showAlert = (title: string, message?: string) => {
+    if (Platform.OS === 'web') {
+      window.alert(`${title}\n${message ?? ''}`);
+    } else {
+      const { Alert } = require('react-native');
+      Alert.alert(title, message);
+    }
+  };
+
+  // ✅ actual logout
   const performSignOut = async () => {
     setLoading(true);
+
     try {
       await signOutApi();
 
-      // 🔥 RESET ALL
       resetAllStores();
 
-      Alert.alert('Success', 'You have been logged out.');
+      showAlert('Success', 'You have been logged out.');
     } catch (error: any) {
-      Alert.alert('Error', error.message);
       setErrors({ general: error.message });
+      showAlert('Error', error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ confirm logout (web + native safe)
   const signOut = () => {
+    if (Platform.OS === 'web') {
+      const ok = window.confirm('Are you sure you want to log out?');
+      if (ok) performSignOut();
+      return;
+    }
+
+    const { Alert } = require('react-native');
+
     Alert.alert('Logout', 'Are you sure you want to log out?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Logout', style: 'destructive', onPress: performSignOut },

@@ -62,11 +62,11 @@ export const DocumentsSchema = z
   })
   .refine(
     (data) => {
-      // If business doc type is selected → URL is required
-      if (data.businessDocumentType) {
-        return !!data.businessDocumentUrl;
-      }
-      return true;
+      const needsBusinessDoc = data.businessDocumentType !== 'None';
+
+      if (!needsBusinessDoc) return true;
+
+      return !!data.businessDocumentUrl;
     },
     {
       message: 'Business document file is required',

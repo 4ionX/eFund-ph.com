@@ -51,6 +51,7 @@ const LoanHistoryScreen = () => {
         ]}
         refreshing={refreshing || isLoading}
         onRefresh={onRefresh}
+        ListFooterComponent={<ThemedView style={{ height: 50 }} />}
         ListEmptyComponent={
           <ThemedView style={styles.emptyContainer}>
             <ThemedText>{`No ${selectedTab} loan applications yet`}</ThemedText>
@@ -63,7 +64,6 @@ const LoanHistoryScreen = () => {
             date={item.status === 'Pending' ? item.createdAt : item.updatedAt}
             status={item.status}
             loanType={item.loanType}
-            provider={item.provider}
             showAction={item.status === 'For Approval'}
           />
         )}

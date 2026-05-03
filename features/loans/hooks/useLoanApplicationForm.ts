@@ -1,11 +1,12 @@
-import { useState, useCallback } from 'react';
-import { Alert } from 'react-native';
+import { useCallback, useState } from 'react';
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 
 import { useAuthStore } from '@/store/auth.store';
 import { createLoanApplication } from '../api/loanApplication.mutations';
 
+import { showAlert } from '@/shared/utils/ShowAlert';
 import type {
   DisbursementMethod,
   LoanApplication,
@@ -50,7 +51,7 @@ export const useLoanApplicationForm = () => {
     },
 
     onSuccess: () => {
-      Alert.alert('Success', 'Successfully created your loan application');
+      showAlert('Success', 'Successfully created your loan application');
       queryClient.invalidateQueries({
         queryKey: ['loanApplications'],
       });
@@ -59,7 +60,7 @@ export const useLoanApplicationForm = () => {
     },
 
     onError: () => {
-      Alert.alert('Error', 'Failed to create loan application');
+      showAlert('Error', 'Failed to create loan application');
     },
   });
 

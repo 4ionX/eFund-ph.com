@@ -1,7 +1,6 @@
-import { router } from 'expo-router';
-
 import { supabaseClient } from '@/core/api/supabaseClient';
-import { Alert } from 'react-native';
+import { showAlert } from '@/shared/utils/ShowAlert';
+import { router } from 'expo-router';
 
 export const signUpWithEmail = async (email: string, password: string) => {
   const { data, error } = await supabaseClient.auth.signUp({
@@ -10,19 +9,17 @@ export const signUpWithEmail = async (email: string, password: string) => {
   });
 
   if (error) {
+    showAlert('Error', error.message);
     throw error;
   }
 
   if (data.user) {
-    Alert.alert(
+    showAlert(
       'Success',
       'Account created successfully! Please check your email to confirm.',
-      [
-        {
-          text: 'OK',
-          onPress: () => router.replace('/auth/login'),
-        },
-      ],
+      () => {
+        router.replace('/auth/login');
+      },
     );
   }
 

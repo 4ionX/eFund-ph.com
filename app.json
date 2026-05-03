@@ -1,19 +1,23 @@
 {
   "expo": {
-    "name": "eFund",
+    "name": "e-Fund",
     "slug": "efund",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "efund",
     "userInterfaceStyle": "automatic",
+
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.aionx.efund",
+      "bundleIdentifier": "com.aionx.eFund",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "eFund uses your camera only for scanning and capturing documents required for loan application and account verification.",
+        "NSUserTrackingUsageDescription": "eFund uses tracking to improve app performance and provide a better user experience. No personal data is sold."
       }
     },
+
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -22,13 +26,15 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.aionx.efund"
+      "package": "com.aionx.eFund",
+      "permissions": ["CAMERA"]
     },
 
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+
     "plugins": [
       "expo-router",
       [
@@ -42,7 +48,13 @@
       ],
       "expo-font",
       "expo-web-browser",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "eFund uses tracking to improve app performance and provide personalized experience. No personal data is sold."
+        }
+      ]
     ],
 
     "experiments": {

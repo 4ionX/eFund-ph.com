@@ -2,15 +2,15 @@
 
 import { useAuthStore } from '@/store/auth.store';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert } from 'react-native';
-import { router } from 'expo-router';
 
 import { useDocumentInformationStore } from '@/store/documents.store';
-import type { Documents } from '../types/documents';
-import { useFileUpload } from './useFileUpload';
 import { createDocuments } from '../api/documents.mutations';
+import type { Documents } from '../types/documents';
 import { DocumentsSchema } from '../validations/documents.validation';
+import { useFileUpload } from './useFileUpload';
 
 export const useDocumentsForm = ({
   initialData,
@@ -34,7 +34,9 @@ export const useDocumentsForm = ({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // 🔥 DISABLE BUSINESS UPLOAD IF NONE
+  // =========================
+  // DISABLE BUSINESS
+  // =========================
   const isBusinessDisabled = useMemo(
     () => formData.businessDocumentType === 'None',
     [formData.businessDocumentType],
@@ -42,16 +44,28 @@ export const useDocumentsForm = ({
 
   const queryClient = useQueryClient();
 
+  // =========================
+  // SAVE
+  // =========================
   const mutation = useMutation({
     mutationFn: (data: Documents) => {
       if (!user) throw new Error('User not authenticated');
       return createDocuments(data, user.id);
     },
     onSuccess: (savedData: Documents) => {
-      queryClient.invalidateQueries({
-        queryKey: ['documents'],
-      });
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
       setdocumentsInfo(savedData);
+
+      // ✅ RESET AFTER SAVE (IMPORTANT FIX)
+      setFormData({
+        idType: 'Passport',
+        idUrl: '',
+        businessDocumentType: 'None',
+        businessDocumentUrl: null,
+      });
+
+      setErrors({});
+
       router.back();
     },
     onError: () => {
@@ -59,6 +73,9 @@ export const useDocumentsForm = ({
     },
   });
 
+  // =========================
+  // HANDLE SAVE
+  // =========================
   const handleSave = useCallback(async () => {
     const result = DocumentsSchema.safeParse(formData);
 
@@ -66,12 +83,10 @@ export const useDocumentsForm = ({
 
     if (!result.success) {
       const formatted: Record<string, string> = {};
-
       result.error.issues.forEach((err) => {
         const key = err.path[0] as string;
         formatted[key] = err.message;
       });
-
       setErrors(formatted);
       return;
     }
@@ -79,36 +94,58 @@ export const useDocumentsForm = ({
     try {
       if (!user) throw new Error('User not authenticated');
 
-      // UPLOAD FILES FIRST
-      const uploads = await uploadBatchDocuments(
-        [
-          {
-            uri: formData.idUrl,
-            field: 'id_url' as const,
-          },
-          ...(formData.businessDocumentUrl
-            ? [
-                {
-                  uri: formData.businessDocumentUrl,
-                  field: 'business_document_url' as const,
-                },
-              ]
-            : []),
-        ],
-        user.id,
-      );
+      // =========================
+      // BUILD UPLOAD LIST (FIXED)
+      // =========================
+      const filesToUpload: any[] = [];
 
-      // SAVE TO DATABASE
+      // ID is REQUIRED
+      if (formData.idUrl) {
+        filesToUpload.push({
+          uri: formData.idUrl,
+          field: 'id_url' as const,
+        });
+      }
+
+      // BUSINESS is OPTIONAL
+      if (
+        formData.businessDocumentType !== 'None' &&
+        formData.businessDocumentUrl
+      ) {
+        filesToUpload.push({
+          uri: formData.businessDocumentUrl,
+          field: 'business_document_url' as const,
+        });
+      }
+
+      // =========================
+      // UPLOAD ONLY IF MAY FILES
+      // =========================
+      let uploads: Record<'id_url' | 'business_document_url', string | null> = {
+        id_url: formData.idUrl || null,
+        business_document_url: formData.businessDocumentUrl || null,
+      };
+
+      if (filesToUpload.length > 0) {
+        uploads = await uploadBatchDocuments(filesToUpload, user.id);
+      }
+
+      // =========================
+      // SAVE TO DB
+      // =========================
       mutation.mutate({
         ...formData,
-        idUrl: uploads.id_url,
-        businessDocumentUrl: uploads.business_document_url,
+        idUrl: uploads.id_url || '',
+        businessDocumentUrl: uploads.business_document_url || null,
       });
     } catch (err: any) {
       Alert.alert('Upload Error', err.message);
     }
-  }, [formData, isLocked, user, uploadBatchDocuments, mutation]);
+  }, [formData, isLocked, mutation, uploadBatchDocuments, user]);
 
+  // =========================
+  // PICK IMAGE (FIXED FOR MOBILE + WEB)
+  // =========================
   const pickImage = useCallback(
     async (field: 'idUrl' | 'businessDocumentUrl') => {
       if (field === 'businessDocumentUrl' && isBusinessDisabled) {
@@ -124,21 +161,36 @@ export const useDocumentsForm = ({
       if (!permission.granted) return;
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
         quality: 1,
+        base64: false,
       });
 
       if (result.canceled) return;
 
+      const asset = result.assets?.[0];
+      if (!asset) return;
+
+      let uri = asset.uri;
+
+      // 🔥 SAFARI FIX: convert blob to stable object URL
+      if (uri.startsWith('blob:')) {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        uri = URL.createObjectURL(blob);
+      }
+
       setFormData((prev) => ({
         ...prev,
-        [field]: result.assets[0].uri,
+        [field]: uri,
       }));
     },
     [isBusinessDisabled],
   );
-
+  // =========================
+  // CHANGE HANDLER
+  // =========================
   const handleChange = useCallback(
     (key: keyof Documents, value: any) => {
       if (isLocked) return;

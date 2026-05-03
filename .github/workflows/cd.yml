@@ -1,0 +1,86 @@
+name: Release + Build + Submit
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    outputs:
+      released: ${{ steps.check.outputs.released }}
+      tag: ${{ steps.check.outputs.tag }}
+      msg: ${{ steps.commit.outputs.msg }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      # 🔥 semantic release
+      - name: Run semantic release
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ✅ get tag + release status (FIXED)
+      - name: Check release
+        id: check
+        run: |
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -n "$TAG" ]; then
+            echo "released=true" >> $GITHUB_OUTPUT
+            echo "tag=$TAG" >> $GITHUB_OUTPUT
+          else
+            echo "released=false" >> $GITHUB_OUTPUT
+          fi
+
+      # 🧠 commit message
+      - name: Get commit message
+        id: commit
+        run: echo "msg=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+
+
+  build:
+    needs: release
+    runs-on: ubuntu-latest
+    if: needs.release.outputs.released == 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+      - run: npm install -g eas-cli
+
+      # 🔥 EAS BUILD
+      - name: EAS Build Production
+        run: |
+          eas build --platform all --profile production --non-interactive \
+          --message "prod: ${{ needs.release.outputs.tag }} | ${{ needs.release.outputs.msg }}"
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+
+  submit:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: npm install -g eas-cli
+
+      # 🚀 SUBMIT (Expo-managed credentials)
+      - name: Submit Android
+        run: eas submit -p android --latest --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}

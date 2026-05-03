@@ -74,7 +74,7 @@ export default function LoginScreen() {
             keyboardType="email-address"
             autoCapitalize="none"
             leftIcon={<Ionicons name="mail" size={20} color="#888" />}
-            style={styles.input}
+            style={[styles.input]}
           />
 
           {/* Password Input */}

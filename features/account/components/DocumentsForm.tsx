@@ -16,8 +16,11 @@ import { Spacing } from '@/shared/constants/theme';
 import EFImage from '@/shared/components/ui/EFImage';
 import { Ionicons } from '@expo/vector-icons';
 import { useDocumentsForm } from '../hooks/useDocumentsForm';
-
-import { useFileUpload } from '@/features/loans/hooks/useFileUpload';
+import { useFileUpload } from '../hooks/useFileUpload';
+import type {
+  BusinessDocumentType,
+  PhilippineIDType,
+} from '../types/documents';
 
 const DocumentsForm = ({ initialData }: any) => {
   const { formData, isLoading, handleChange, handleSave, pickImage, isLocked } =
@@ -27,74 +30,123 @@ const DocumentsForm = ({ initialData }: any) => {
 
   const [idImageUrl, setIdImageUrl] = useState<string | null>(null);
   const [businessImageUrl, setBusinessImageUrl] = useState<string | null>(null);
-  const isStoragePath = (value: string) =>
-    !value.startsWith('file://') && !value.startsWith('content://');
 
+  // safer detection
+  const isLocalFile = (value?: string | null) =>
+    !!value &&
+    (value.startsWith('file://') ||
+      value.startsWith('content://') ||
+      value.startsWith('blob:') ||
+      value.startsWith('data:'));
+
+  // ================= ID IMAGE =================
   useEffect(() => {
-    let mounted = true;
+    let alive = true;
 
-    const loadId = async () => {
-      if (!formData.idUrl) return;
-
-      setIdImageUrl(null);
+    const load = async () => {
+      if (!formData.idUrl) {
+        setIdImageUrl(null);
+        return;
+      }
 
       try {
-        // 🔥 ONLY resolve if it's already uploaded path
-        if (!isStoragePath(formData.idUrl)) {
-          setIdImageUrl(formData.idUrl); // local preview
+        // 🔥 LOCAL FILES (WEB + MOBILE)
+        if (isLocalFile(formData.idUrl)) {
+          setIdImageUrl(formData.idUrl);
           return;
         }
 
         const url = await getSignedUrl(formData.idUrl);
 
-        if (mounted) setIdImageUrl(url);
+        if (alive) setIdImageUrl(url);
       } catch (err) {
         console.log('ID error:', err);
       }
     };
 
-    loadId();
+    load();
 
     return () => {
-      mounted = false;
+      alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.idUrl]);
-
+  // ================= BUSINESS IMAGE =================
   useEffect(() => {
-    let mounted = true;
+    let alive = true;
 
-    const loadBusiness = async () => {
-      if (!formData.businessDocumentUrl) return;
-
-      setBusinessImageUrl(null);
+    const load = async () => {
+      if (!formData.businessDocumentUrl) {
+        setBusinessImageUrl(null);
+        return;
+      }
 
       try {
-        if (!isStoragePath(formData.businessDocumentUrl)) {
+        if (isLocalFile(formData.businessDocumentUrl)) {
           setBusinessImageUrl(formData.businessDocumentUrl);
           return;
         }
 
         const url = await getSignedUrl(formData.businessDocumentUrl);
 
-        if (mounted) setBusinessImageUrl(url);
+        if (alive) setBusinessImageUrl(url);
       } catch (err) {
         console.log('Business error:', err);
       }
     };
 
-    loadBusiness();
+    load();
 
     return () => {
-      mounted = false;
+      alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.businessDocumentUrl]);
 
+  const PHILIPPINE_ID_TYPES: PhilippineIDType[] = [
+    'PhilSys ID (National ID)',
+    'Passport',
+    "Driver's License",
+    'UMID',
+    'SSS ID',
+    'GSIS ID',
+    'PRC ID',
+    "Voter's ID",
+    'Postal ID',
+    'PhilHealth ID',
+    'TIN ID',
+    'Senior Citizen ID',
+    'PWD ID',
+    'Barangay ID',
+    'Police Clearance',
+    'NBI Clearance',
+    'OWWA ID',
+    "Seaman's Book",
+    'Company ID',
+    'Student ID',
+    'Other',
+  ];
+
+  const BUSINESS_DOCUMENT_TYPES: BusinessDocumentType[] = [
+    'DTI Certificate',
+    'SEC Registration',
+    'CDA Registration',
+    "Mayor's Permit",
+    'Barangay Business Clearance',
+    'BIR Certificate of Registration (Form 2303)',
+    'Business Permit',
+    'Audited Financial Statement',
+    'Income Tax Return',
+    'Lease Contract',
+    'Proof of Billing',
+    'Other',
+    'None',
+  ];
+
   return (
     <ThemedView style={styles.container}>
       <ScrollView keyboardShouldPersistTaps="handled">
-        {/* ================= ID TYPE ================= */}
+        {/* ID TYPE */}
         <ThemedText type="defaultSemiBold">ID Type</ThemedText>
 
         <ThemedView style={styles.pickerContainer}>
@@ -103,19 +155,19 @@ const DocumentsForm = ({ initialData }: any) => {
             selectedValue={formData.idType}
             onValueChange={(v) => handleChange('idType', v)}
           >
-            <Picker.Item label="Passport" value="Passport" />
-            <Picker.Item label="Driver's License" value="Driver's License" />
-            <Picker.Item label="UMID" value="UMID" />
-            <Picker.Item label="SSS ID" value="SSS ID" />
-            <Picker.Item label="PhilSys ID" value="PhilSys ID (National ID)" />
+            {PHILIPPINE_ID_TYPES.map((item) => (
+              <Picker.Item key={item} label={item} value={item} />
+            ))}
           </Picker>
         </ThemedView>
 
-        {/* ================= ID UPLOAD ================= */}
+        {/* ID UPLOAD */}
         <TouchableOpacity
           onPress={() => pickImage('idUrl')}
           disabled={isLocked}
-          style={[styles.upload, isLocked && { opacity: 1 }]}
+          activeOpacity={0.7}
+          delayPressIn={0}
+          style={styles.upload}
         >
           {idImageUrl ? (
             <EFImage
@@ -131,7 +183,7 @@ const DocumentsForm = ({ initialData }: any) => {
           )}
         </TouchableOpacity>
 
-        {/* ================= BUSINESS TYPE ================= */}
+        {/* BUSINESS TYPE */}
         <ThemedText type="defaultSemiBold">Business Document Type</ThemedText>
 
         <ThemedView style={styles.pickerContainer}>
@@ -140,19 +192,19 @@ const DocumentsForm = ({ initialData }: any) => {
             selectedValue={formData.businessDocumentType}
             onValueChange={(v) => handleChange('businessDocumentType', v)}
           >
-            <Picker.Item label="DTI Certificate" value="DTI Certificate" />
-            <Picker.Item label="SEC Registration" value="SEC Registration" />
-            <Picker.Item label="Mayor's Permit" value="Mayor's Permit" />
-            <Picker.Item label="Business Permit" value="Business Permit" />
-            <Picker.Item label="Other" value="Other" />
+            {BUSINESS_DOCUMENT_TYPES.map((item) => (
+              <Picker.Item key={item} label={item} value={item} />
+            ))}
           </Picker>
         </ThemedView>
 
-        {/* ================= BUSINESS UPLOAD ================= */}
+        {/* BUSINESS UPLOAD */}
         <TouchableOpacity
           onPress={() => pickImage('businessDocumentUrl')}
           disabled={isLocked}
-          style={[styles.upload, isLocked && { opacity: 1 }]}
+          activeOpacity={0.7}
+          delayPressIn={0}
+          style={styles.upload}
         >
           {businessImageUrl ? (
             <EFImage
@@ -168,7 +220,7 @@ const DocumentsForm = ({ initialData }: any) => {
           )}
         </TouchableOpacity>
 
-        {/* ================= SAVE ================= */}
+        {/* SAVE */}
         {!initialData && (
           <View style={styles.footer}>
             <AnimatedButton

@@ -1,10 +1,11 @@
 import { useAuthStore } from '@/store/auth.store';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { Alert } from 'react-native';
+
+import { showAlert } from '@/shared/utils/ShowAlert';
 import { router } from 'expo-router';
-import { useFileUpload } from './useFileUpload';
 import { updateLoanContract } from '../api/loanApplication.mutations';
+import { useFileUpload } from './useFileUpload';
 
 export const useLoanContractForm = () => {
   const { user } = useAuthStore();
@@ -35,12 +36,17 @@ export const useLoanContractForm = () => {
       router.back();
     },
     onError: () => {
-      Alert.alert('Error', 'Something went wrong');
+      showAlert('Error', 'Something went wrong');
     },
   });
 
   const handleSave = useCallback(
     async (signatureBase64: string, contractId: string) => {
+      console.log('Saving contract with signature:', {
+        userId: user?.id,
+        contractId,
+        signatureBase64: signatureBase64 ? '[base64 data]' : 'No signature',
+      });
       try {
         if (!user) throw new Error('User not authenticated');
         if (!signatureBase64) throw new Error('Signature is required');
@@ -56,10 +62,10 @@ export const useLoanContractForm = () => {
           contractId,
         });
 
-        Alert.alert('Contract signed successfully!');
+        showAlert('Success', 'Contract signed successfully!');
       } catch (err: any) {
         console.log(err);
-        Alert.alert('Error', err.message || 'Failed to save contract');
+        showAlert('Error', err.message || 'Failed to save contract');
       }
     },
     [user, mutation, uploadSignatureFile],

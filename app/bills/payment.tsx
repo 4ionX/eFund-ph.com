@@ -184,7 +184,14 @@ export default function PaymentScreen() {
 
   const userId = useAuthStore((s) => s.user.id);
 
-  const handlePay = () => {
+  useEffect(() => {
+    if (!selectedSchedule) {
+      setAmount('');
+      setPayMode('Principal Payment');
+    }
+  }, [selectedSchedule]);
+
+  const handlePay = async () => {
     if (!selectedSchedule) return;
 
     const enteredAmount = Number(amount);
@@ -195,30 +202,31 @@ export default function PaymentScreen() {
         : selectedSchedule.balance;
 
     if (enteredAmount > maxAllowed) {
-      alert(
-        `You cannot pay more than ${formatCurrency(maxAllowed)} for this ${payMode}.`,
-      );
+      alert(`Max: ${formatCurrency(maxAllowed)}`);
       return;
     }
 
     if (enteredAmount <= 0 || isNaN(enteredAmount)) {
-      alert('Please enter a valid amount.');
+      alert('Enter valid amount');
       return;
     }
 
-    initiatePayment(
-      loanAccountId as string,
-      enteredAmount,
-      userId,
-      selectedSchedule.id,
-      payMode,
-      payMode === 'Penalty Payment' ? 'Paying penalty' : 'Paying installment',
-    );
-
+    // 🔥 CLOSE MODAL FIRST (important UX fix)
     setSelectedSchedule(null);
     setAmount('');
-  };
 
+    // optional: small delay para smooth UX + avoids Safari timing issues
+    setTimeout(() => {
+      initiatePayment(
+        loanAccountId as string,
+        enteredAmount,
+        userId,
+        selectedSchedule.id,
+        payMode,
+        payMode === 'Penalty Payment' ? 'Paying penalty' : 'Paying installment',
+      );
+    }, 200);
+  };
   const closeModal = () => {
     Keyboard.dismiss();
     setSelectedSchedule(null);
@@ -395,7 +403,7 @@ export default function PaymentScreen() {
       <Modal visible={!!selectedSchedule} transparent animationType="slide">
         <TouchableWithoutFeedback onPress={closeModal}>
           <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <TouchableWithoutFeedback>
               <View style={styles.modalContainer}>
                 <ThemedText type="defaultSemiBold" style={{ color: 'black' }}>
                   Pay{' '}
@@ -420,6 +428,7 @@ export default function PaymentScreen() {
                     colorScheme === 'dark' ? '#888' : '#bbb'
                   }
                   style={styles.input}
+                  autoFocus
                 />
 
                 <View style={{ gap: 10 }}>
@@ -527,6 +536,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#00000080',
     padding: 20,
+    paddingBottom: 120,
   },
   modalContainer: {
     backgroundColor: 'white',
@@ -538,5 +548,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     borderRadius: 8,
+    fontSize: 16,
   },
 });

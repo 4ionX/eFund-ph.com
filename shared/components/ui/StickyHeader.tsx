@@ -3,13 +3,8 @@ import { ThemedView } from '@/shared/components/theme/ThemedView';
 import { Colors, IconSize, Spacing } from '@/shared/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
-import {
-  Alert,
-  Pressable,
-  StyleSheet,
-  View,
-  type ViewStyle,
-} from 'react-native';
+import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
+import { showAlert } from '../../utils/ShowAlert';
 
 type StickyHeaderProps = {
   title: string;
@@ -32,7 +27,12 @@ export default function StickyHeader({
 
         {rightIcon && (
           <Pressable
-            onPress={() => Alert.alert('Coming soon...')}
+            onPress={() =>
+              showAlert(
+                'Coming soon...',
+                'This feature is under development and will be available in a future update.',
+              )
+            }
             style={styles.iconButton}
           >
             <Ionicons

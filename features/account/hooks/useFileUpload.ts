@@ -1,6 +1,5 @@
 import { supabaseClient } from '@/core/api/supabaseClient';
 import * as ImageManipulator from 'expo-image-manipulator';
-import { File } from 'expo-file-system';
 
 export type UploadItem = {
   uri: string;
@@ -8,9 +7,6 @@ export type UploadItem = {
 };
 
 export const useFileUpload = () => {
-  // =========================
-  // COMPRESS IMAGE
-  // =========================
   const compressImage = async (uri: string) => {
     const result = await ImageManipulator.manipulateAsync(
       uri,
@@ -24,60 +20,50 @@ export const useFileUpload = () => {
     return result.uri;
   };
 
-  // =========================
-  // GENERIC UPLOAD
-  // =========================
-  const uploadFile = async (
-    uri: string,
-    bucket: 'documents' | 'signatures',
-    path: string,
-  ) => {
-    const compressedUri = await compressImage(uri);
+  // 🔥 SAFE FOR WEB + MOBILE
+  const uriToBlob = async (uri: string) => {
+    const res = await fetch(uri);
+    return await res.blob();
+  };
 
-    const file = new File(compressedUri);
-    const buffer = await file.arrayBuffer();
+  const uploadFile = async (uri: string, path: string) => {
+    const compressedUri = await compressImage(uri);
+    const blob = await uriToBlob(compressedUri);
 
     const { error } = await supabaseClient.storage
-      .from(bucket)
-      .upload(path, buffer, {
+      .from('documents') // ✅ FIXED BUCKET
+      .upload(path, blob, {
         contentType: 'image/jpeg',
         upsert: true,
       });
 
     if (error) throw new Error(error.message);
 
-    // ✅ ALWAYS return PATH only
     return path;
   };
 
   // =========================
-  // DOCUMENT UPLOAD
+  // ID / BUSINESS UPLOAD
   // =========================
   const uploadDocumentImage = async (
     uri: string,
     userId: string,
     folder: 'id' | 'business',
   ) => {
-    const path = `${folder}/${userId}.jpg`;
-    return uploadFile(uri, 'documents', path);
+    const path = `${folder}/${userId}.jpg`; // ✅ folder structure
+    return uploadFile(uri, path);
   };
 
-  // =========================
-  // GET SIGNED URL (UNIFIED)
-  // =========================
-  const getSignedUrl = async (bucket: string, path: string) => {
+  const getSignedUrl = async (path: string) => {
     const { data, error } = await supabaseClient.storage
-      .from(bucket)
-      .createSignedUrl(path, 60 * 10); // 10 mins
+      .from('documents')
+      .createSignedUrl(path, 60 * 10);
 
     if (error) throw new Error(error.message);
 
     return data.signedUrl;
   };
 
-  // =========================
-  // BATCH DOCUMENT UPLOAD
-  // =========================
   const uploadBatchDocuments = async (
     items: UploadItem[],
     userId: string,
@@ -96,9 +82,7 @@ export const useFileUpload = () => {
 
       results[item.field] = path;
 
-      if (onProgress) {
-        onProgress(Math.round(((i + 1) / items.length) * 100));
-      }
+      onProgress?.(Math.round(((i + 1) / items.length) * 100));
     }
 
     return results;

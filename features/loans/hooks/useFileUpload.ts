@@ -1,6 +1,7 @@
+import { Platform } from 'react-native';
 import { supabaseClient } from '@/core/api/supabaseClient';
 import * as ImageManipulator from 'expo-image-manipulator';
-import * as FileSystem from 'expo-file-system/legacy'; // ✅ FIX
+import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
 
 export const useFileUpload = () => {
@@ -18,17 +19,25 @@ export const useFileUpload = () => {
   };
 
   const uploadSignatureFile = async (
-    uri: string,
+    uriOrBase64: string,
     userId: string,
     loanContractId: string,
   ) => {
-    const compressedUri = await compressImage(uri);
-
     const filePath = `${userId}/${loanContractId}.jpg`;
 
-    const base64 = await FileSystem.readAsStringAsync(compressedUri, {
-      encoding: 'base64',
-    });
+    let base64: string;
+
+    // 🔥 WEB CASE (IMPORTANT FIX)
+    if (Platform.OS === 'web') {
+      // already base64 from toDataURL()
+      base64 = uriOrBase64;
+    } else {
+      const compressedUri = await compressImage(uriOrBase64);
+
+      base64 = await FileSystem.readAsStringAsync(compressedUri, {
+        encoding: 'base64',
+      });
+    }
 
     const fileBuffer = decode(base64);
 
@@ -46,7 +55,7 @@ export const useFileUpload = () => {
 
   const getSignedUrl = async (filePath: string) => {
     const { data, error } = await supabaseClient.storage
-      .from('documents')
+      .from('signatures')
       .createSignedUrl(filePath, 60 * 10);
 
     if (error) throw new Error(error.message);

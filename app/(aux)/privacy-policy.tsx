@@ -9,37 +9,49 @@ import { router } from 'expo-router';
 
 const PRIVACY_POLICY_TEXT = `
 1. Introduction
-eFund Financial Services (“we”, “our”, “us”) is a mobile application designed for our clients in Ilocos Sur. This Privacy Policy explains how we collect, use, and protect your personal information when you use our app.
+eFund is a mobile application designed to provide financial services and loan-related features for our users.
 
-2. Information We Collect
-- Personal Information: Name, contact number, address, birth date, civil status.
-- Documents: Identification cards and optional business documents you upload.
-- Device Information: Device type, OS version, app usage statistics.
+2. Camera Usage
+eFund uses camera access only for app functionality such as scanning documents or capturing images required within the app.
 
-3. How We Use Your Information
-Your information is used solely for:
-- Managing client profiles and services.
-- Verifying your identity and documents.
-- Communicating updates, promotions, and notifications.
-- Ensuring security and preventing fraud.
+We do not use the camera for any background tracking or unauthorized recording.
 
-4. Sharing Your Information
-We do not sell or share your data with third parties except:
-- When required by law.
-- With trusted service providers who help us operate the app.
+3. Information We Collect
+We may collect the following information:
+- Personal Information: name, contact number, address, birth date, civil status
+- Documents: valid IDs and supporting documents uploaded by the user
+- App Data: basic usage data for app functionality and improvement
 
-5. Your Rights
-- Access and Correction: You can request to view or correct your data.
-- Deletion: You can request us to delete your personal information.
-- Consent Withdrawal: You can withdraw consent to data collection anytime.
+4. How We Use Your Information
+Your information is used only for:
+- Account and profile management
+- Loan processing and verification
+- Document validation
+- App functionality and service improvement
 
-6. Security
-We use reasonable safeguards, but no method is 100% secure.
+5. Data Sharing
+We do not sell your personal data.
 
-7. Children’s Privacy
-Our app is intended for users 18 years and older.
+We may only share information:
+- When required by law
+- With trusted service providers necessary for app operation
 
-8. Contact
+6. Data Security
+We implement reasonable security measures to protect your data. However, no system is 100% secure.
+
+7. Data Retention
+We retain your data only as long as necessary to provide our services.
+
+8. Children’s Privacy
+This app is intended for users 18 years old and above.
+
+9. Your Rights
+You may request:
+- Access to your data
+- Correction of incorrect data
+- Deletion of your account and data
+
+10. Contact Us
 Email: jey31vee@gmail.com
 Phone: +639455517086
 `;

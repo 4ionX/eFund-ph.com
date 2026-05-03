@@ -20,7 +20,6 @@ type Props = {
   date: string;
   status: LoanStatus;
   loanType: string;
-  provider: string;
   showAction: boolean;
 };
 
@@ -38,7 +37,6 @@ const LoanListCard = ({
   date,
   status,
   loanType,
-  provider,
   showAction,
 }: Props) => {
   const cardColor = useThemeColor({}, 'card');
@@ -82,7 +80,7 @@ const LoanListCard = ({
       <View style={styles.details}>
         <ThemedText type="description">Loan type: {loanType}</ThemedText>
 
-        <ThemedText type="description">Provider: {provider}</ThemedText>
+        {/* <ThemedText type="description">Provider: {provider}</ThemedText> */}
 
         <ThemedText type="description">Date: {formatDate(date)}</ThemedText>
       </View>

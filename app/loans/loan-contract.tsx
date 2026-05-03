@@ -1,13 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
-  Alert,
   ScrollView,
   useColorScheme,
   View,
+  Platform,
 } from 'react-native';
 import SignatureScreen from 'react-native-signature-canvas';
 import ViewShot from 'react-native-view-shot';
+
+// eslint-disable-next-line import/no-named-as-default
+import SignatureCanvas from 'react-signature-canvas';
 
 import { ThemedText } from '@/shared/components/theme/ThemedText';
 import { ThemedView } from '@/shared/components/theme/ThemedView';
@@ -27,6 +30,7 @@ import EFImage from '@/shared/components/ui/EFImage';
 import { useFetchLoanContract } from '@/features/loans/hooks/useFetchContract';
 import { useLoanContractForm } from '@/features/loans/hooks/useLoanContractForm';
 import { useFileUpload } from '@/features/loans/hooks/useFileUpload';
+import { showAlert } from '@/shared/utils/ShowAlert';
 
 const LoanContractScreen = () => {
   const { loanApplicationId } = useLocalSearchParams<{
@@ -41,6 +45,7 @@ const LoanContractScreen = () => {
 
   const ref = useRef<any>(null);
   const viewRef = useRef<any>(null);
+  const webSigRef = useRef<any>(null);
 
   const [signature, setSignature] = useState<string | null>(null);
   const [scrollEnabled, setScrollEnabled] = useState(true);
@@ -52,7 +57,11 @@ const LoanContractScreen = () => {
   const cardBg = isDark ? '#1C1C1E' : '#fff';
 
   const handleClear = () => {
-    ref.current?.clearSignature();
+    if (Platform.OS === 'web') {
+      webSigRef.current?.clear();
+    } else {
+      ref.current?.clearSignature();
+    }
     setSignature(null);
   };
 
@@ -64,16 +73,6 @@ const LoanContractScreen = () => {
   const personal = loan?.personalInfo;
   const coBorrower = loan?.coBorrowers;
   const contractInfo = loan?.contractInfo;
-
-  const handleOK = (sig: string) => {
-    if (!sig) {
-      Alert.alert('Error', 'Please provide a signature');
-      return;
-    }
-
-    setSignature(sig);
-    handleSubmit(sig, contractInfo?.id);
-  };
 
   // ✅ ALWAYS define hooks first
   useEffect(() => {
@@ -106,7 +105,20 @@ const LoanContractScreen = () => {
   }
 
   const handleSave = () => {
-    ref.current?.readSignature();
+    if (Platform.OS === 'web') {
+      const sig = webSigRef.current?.toDataURL();
+
+      if (!sig) {
+        showAlert('Error', 'Please provide a signature');
+        return;
+      }
+
+      // 🔥 IMPORTANT FIX: remove base64 prefix
+      const cleanBase64 = sig.replace(/^data:image\/\w+;base64,/, '');
+
+      setSignature(sig); // ok for preview
+      handleSubmit(cleanBase64, contractInfo?.id);
+    }
   };
 
   const fullName = [
@@ -376,16 +388,38 @@ const LoanContractScreen = () => {
           <>
             <ThemedText style={styles.signLabel}>Please sign below:</ThemedText>
 
-            <ThemedView style={[styles.signatureContainer, { borderColor }]}>
-              <SignatureScreen
-                ref={ref}
-                onOK={handleOK}
-                webStyle={signaturePadStyle}
-                autoClear={false}
-                onBegin={() => setScrollEnabled(false)}
-                onEnd={() => setScrollEnabled(true)}
-              />
-            </ThemedView>
+            {Platform.OS === 'web' ? (
+              <View
+                style={{
+                  height: 200,
+                  borderWidth: 1,
+                  overflow: 'hidden',
+                  backgroundColor: '#fff',
+                  margin: 16,
+                }}
+              >
+                <SignatureCanvas
+                  ref={webSigRef}
+                  penColor="black"
+                  canvasProps={{
+                    style: {
+                      width: '100%',
+                      height: '200px',
+                      touchAction: 'none',
+                    },
+                  }}
+                />
+              </View>
+            ) : (
+              <ThemedView style={[styles.signatureContainer, { borderColor }]}>
+                <SignatureScreen
+                  ref={ref}
+                  autoClear={false}
+                  onBegin={() => setScrollEnabled(false)}
+                  onEnd={() => setScrollEnabled(true)}
+                />
+              </ThemedView>
+            )}
 
             {/* ACTION */}
             <ThemedView style={styles.actions}>
@@ -539,7 +573,3 @@ const styles = StyleSheet.create({
     letterSpacing: 20,
   },
 });
-
-const signaturePadStyle = `
-  .m-signature-pad--footer {display: none;}
-`;

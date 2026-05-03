@@ -1,13 +1,13 @@
-import { Colors } from "@/shared/constants/theme";
-import { View } from "react-native";
-import { Gesture } from "react-native-gesture-handler";
+import { Colors } from '@/shared/constants/theme';
+import type { View } from 'react-native';
+import { Gesture } from 'react-native-gesture-handler';
 import {
   measure,
   useAnimatedRef,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-} from "react-native-reanimated";
+} from 'react-native-reanimated';
 
 const useTrippleAnimation = () => {
   const centerX = useSharedValue(0);
@@ -36,11 +36,11 @@ const useTrippleAnimation = () => {
     if (!layout) return {};
     const diameter = Math.max(layout.width, layout.height) * 2;
     return {
-      position: "absolute",
+      position: 'absolute',
       width: diameter,
       height: diameter,
       borderRadius: diameter / 2,
-      backgroundColor: Colors.brand.secondary,
+      backgroundColor: Colors.brand.primary,
       opacity: rippleOpacity.value,
       top: centerY.value - diameter / 2,
       left: centerX.value - diameter / 2,

@@ -48,7 +48,7 @@ export const ThemedTextInput: React.FC<ThemedTextInputProps> = ({
             { color: textColor },
             style,
             leftIcon ? { paddingLeft: 40 } : {},
-            rightIcon ? { paddingRight: 40 } : {},
+            { paddingRight: 40 }, // ✅ ALWAYS reserve space
           ]}
           placeholderTextColor={Colors.semantic.disabled}
           onFocus={() => setIsFocused(true)}

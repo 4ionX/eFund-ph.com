@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/auth.store';
 import useBillsTabNavigator from '@/features/bills/hooks/useBillsTabNavigator';
 import BillsCard from '@/features/bills/components/BillsCard';
 import { useFetchLoanAccounts } from '@/features/bills/hooks/useFetchLoanAccounts';
+import { ThemedView } from '@/shared/components/theme/ThemedView';
 
 const BillsScreen = () => {
   const {
@@ -75,6 +76,7 @@ const BillsScreen = () => {
           data={filteredLoans}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}
+          ListFooterComponent={<ThemedView style={{ height: 50 }} />}
           renderItem={({ item }) => (
             <BillsCard
               amount={item.amount}
