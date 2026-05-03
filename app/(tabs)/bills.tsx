@@ -61,38 +61,39 @@ const BillsScreen = () => {
         title="Loan Accounts"
         onBackPress={() => router.back()}
       />
-
-      <TopTabNavigator
-        STATUS_TABS={tabs}
-        selectedTab={selectedTab}
-        handleTabPress={handleTabPress}
-      />
-
-      {/* LOADING */}
-      {isLoading ? (
-        <ActivityIndicator style={{ marginTop: 20 }} />
-      ) : (
-        <FlatList
-          data={filteredLoans}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContainer}
-          ListFooterComponent={<ThemedView style={{ height: 50 }} />}
-          renderItem={({ item }) => (
-            <BillsCard
-              amount={item.amount}
-              referenceNumber={item.referenceNumber}
-              date={item.date}
-              status={item.status}
-              loanType={item.loanType}
-              showAction={item.status !== 'Closed'}
-              loanAccountId={item.loanAccountId}
-            />
-          )}
-          // ✅ REFRESH CONTROL
-          refreshing={isRefetching}
-          onRefresh={refetch}
+      <ThemedView style={styles.content}>
+        <TopTabNavigator
+          STATUS_TABS={tabs}
+          selectedTab={selectedTab}
+          handleTabPress={handleTabPress}
         />
-      )}
+
+        {/* LOADING */}
+        {isLoading ? (
+          <ActivityIndicator style={{ marginTop: 20 }} />
+        ) : (
+          <FlatList
+            data={filteredLoans}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContainer}
+            ListFooterComponent={<ThemedView style={{ height: 50 }} />}
+            renderItem={({ item }) => (
+              <BillsCard
+                amount={item.amount}
+                referenceNumber={item.referenceNumber}
+                date={item.date}
+                status={item.status}
+                loanType={item.loanType}
+                showAction={item.status !== 'Closed'}
+                loanAccountId={item.loanAccountId}
+              />
+            )}
+            // ✅ REFRESH CONTROL
+            refreshing={isRefetching}
+            onRefresh={refetch}
+          />
+        )}
+      </ThemedView>
     </ThemedSafeAreaView>
   );
 };
@@ -100,6 +101,9 @@ const BillsScreen = () => {
 export default BillsScreen;
 
 const styles = StyleSheet.create({
+  content: {
+    flex: 1,
+  },
   listContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
