@@ -5,6 +5,7 @@ import { Alert } from 'react-native';
 import { sendPasswordResetEmail } from '../api/password.api';
 import { signInWithEmail } from '../api/signIn.api';
 import { signInWithGoogle } from '../api/google.api';
+import { showAlert } from '@/shared/utils/ShowAlert';
 
 export const useLogin = () => {
   const { setUser } = useAuthStore();
@@ -63,7 +64,7 @@ export const useLogin = () => {
     setLoading(true);
     try {
       await sendPasswordResetEmail(email);
-      Alert.alert('Success', 'Password reset email sent.');
+      showAlert('Success', 'Password reset email sent.');
     } catch (error: any) {
       setErrors({ email: error.message });
     } finally {

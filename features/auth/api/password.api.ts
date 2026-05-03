@@ -19,11 +19,6 @@ export const sendPasswordResetEmail = async (email: string) => {
 };
 
 export const updatePassword = async (newPassword: string) => {
-  const session = await supabaseClient.auth.getSession();
-  const user = session.data.session?.user;
-
-  if (!user) throw new Error('No authenticated user found');
-
   const { data, error } = await supabaseClient.auth.updateUser({
     password: newPassword,
   });

@@ -15,6 +15,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import AppContainer from '@/shared/components/ui/AppContainer';
 
 const queryClient = new QueryClient();
 
@@ -35,12 +36,14 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, session } = useAuth();
   if (isLoading) {
     return null;
   }
-
-  const isAuthenticated = !!user?.id;
+  const isAuthenticated =
+    !!user?.id &&
+    session?.user?.recovery !== true &&
+    session?.user?.aud === 'authenticated';
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -48,114 +51,116 @@ function RootLayoutNav() {
         <SafeAreaProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <BottomSheetModalProvider>
-              <Stack>
-                {/* Protected Routes */}
-                <Stack.Protected guard={isAuthenticated}>
-                  <Stack.Screen
-                    name="(tabs)"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="loans/loan-application"
-                    options={{ presentation: 'modal', headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="loans/loan-contract"
-                    options={{
-                      animation: 'slide_from_right',
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="notifications/notification"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="bills/payment"
-                    options={{
-                      animation: 'slide_from_right',
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="account/personal-information"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="account/co-borrower"
-                    options={{
-                      animation: 'slide_from_right',
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="account/contact-references"
-                    options={{
-                      animation: 'slide_from_right',
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="account/documents"
-                    options={{
-                      animation: 'slide_from_right',
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="guidelines/loan-steps"
-                    options={{
-                      animation: 'slide_from_right',
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="general/support"
-                    options={{
-                      animation: 'slide_from_right',
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="(aux)/privacy-policy"
-                    options={{
-                      headerShown: false,
-                      animation: 'slide_from_bottom',
-                    }}
-                  />
-                  <Stack.Screen
-                    name="(aux)/terms-and-conditions"
-                    options={{
-                      headerShown: false,
-                      animation: 'slide_from_bottom',
-                    }}
-                  />
-                </Stack.Protected>
-                <Stack.Protected guard={!isAuthenticated}>
-                  {/* Public / Auth Routes */}
-                  <Stack.Screen
-                    name="auth/login"
-                    options={{
-                      headerShown: false,
-                      animation: 'slide_from_right',
-                    }}
-                  />
-                  <Stack.Screen
-                    name="auth/reset-password"
-                    options={{
-                      headerShown: false,
-                      animation: 'slide_from_right',
-                    }}
-                  />
-                  <Stack.Screen
-                    name="auth/sign-up"
-                    options={{
-                      headerShown: false,
-                      animation: 'slide_from_right',
-                    }}
-                  />
-                </Stack.Protected>
-              </Stack>
+              <AppContainer>
+                <Stack>
+                  {/* Protected Routes */}
+                  <Stack.Protected guard={isAuthenticated}>
+                    <Stack.Screen
+                      name="(tabs)"
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="loans/loan-application"
+                      options={{ presentation: 'modal', headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="loans/loan-contract"
+                      options={{
+                        animation: 'slide_from_right',
+                        headerShown: false,
+                      }}
+                    />
+                    <Stack.Screen
+                      name="notifications/notification"
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="bills/payment"
+                      options={{
+                        animation: 'slide_from_right',
+                        headerShown: false,
+                      }}
+                    />
+                    <Stack.Screen
+                      name="account/personal-information"
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="account/co-borrower"
+                      options={{
+                        animation: 'slide_from_right',
+                        headerShown: false,
+                      }}
+                    />
+                    <Stack.Screen
+                      name="account/contact-references"
+                      options={{
+                        animation: 'slide_from_right',
+                        headerShown: false,
+                      }}
+                    />
+                    <Stack.Screen
+                      name="account/documents"
+                      options={{
+                        animation: 'slide_from_right',
+                        headerShown: false,
+                      }}
+                    />
+                    <Stack.Screen
+                      name="guidelines/loan-steps"
+                      options={{
+                        animation: 'slide_from_right',
+                        headerShown: false,
+                      }}
+                    />
+                    <Stack.Screen
+                      name="general/support"
+                      options={{
+                        animation: 'slide_from_right',
+                        headerShown: false,
+                      }}
+                    />
+                    <Stack.Screen
+                      name="(aux)/privacy-policy"
+                      options={{
+                        headerShown: false,
+                        animation: 'slide_from_bottom',
+                      }}
+                    />
+                    <Stack.Screen
+                      name="(aux)/terms-and-conditions"
+                      options={{
+                        headerShown: false,
+                        animation: 'slide_from_bottom',
+                      }}
+                    />
+                  </Stack.Protected>
+                  <Stack.Protected guard={!isAuthenticated}>
+                    {/* Public / Auth Routes */}
+                    <Stack.Screen
+                      name="auth/login"
+                      options={{
+                        headerShown: false,
+                        animation: 'slide_from_right',
+                      }}
+                    />
+                    <Stack.Screen
+                      name="auth/reset-password"
+                      options={{
+                        headerShown: false,
+                        animation: 'slide_from_right',
+                      }}
+                    />
+                    <Stack.Screen
+                      name="auth/sign-up"
+                      options={{
+                        headerShown: false,
+                        animation: 'slide_from_right',
+                      }}
+                    />
+                  </Stack.Protected>
+                </Stack>
+              </AppContainer>
             </BottomSheetModalProvider>
             <StatusBar style="auto" />
           </GestureHandlerRootView>

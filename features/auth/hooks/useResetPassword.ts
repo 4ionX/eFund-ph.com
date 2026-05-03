@@ -5,6 +5,7 @@ import {
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import { updatePassword } from '../api/password.api';
+import { showAlert } from '@/shared/utils/ShowAlert';
 
 export const useResetPassword = () => {
   const [password, setPassword] = useState('');
@@ -38,7 +39,7 @@ export const useResetPassword = () => {
     try {
       await updatePassword(password);
 
-      Alert.alert('Success', 'Your password has been updated successfully!');
+      showAlert('Success', 'Your password has been updated successfully!');
 
       // optional redirect after success
       // router.replace('/auth/login');

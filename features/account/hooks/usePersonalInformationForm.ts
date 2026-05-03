@@ -14,6 +14,8 @@ export const usePersonalInformationForm = ({
   initialData?: PersonalInformation;
 }) => {
   const { user } = useAuthStore();
+  const { setPersonalInfo } = usePersonalInformationStore();
+
   const [formData, setFormData] = useState<PersonalInformation>(
     initialData ?? {
       firstName: '',
@@ -30,9 +32,10 @@ export const usePersonalInformationForm = ({
       socialMediaLink: '',
     },
   );
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const { setPersonalInfo } = usePersonalInformationStore();
+
   const isLocked = !!initialData;
 
   const queryClient = useQueryClient();
@@ -42,16 +45,16 @@ export const usePersonalInformationForm = ({
       if (!user) throw new Error('User not authenticated');
       return createPersonalInformation(data, user.id);
     },
-    onSuccess: (savedData: PersonalInformation) => {
+    onSuccess: (savedData) => {
       queryClient.invalidateQueries({
-        queryKey: ['documents'],
+        queryKey: ['personal-information'], // ✅ FIXED
       });
+
       setPersonalInfo(savedData);
       router.back();
     },
-    onError: (err: any) => {
-      console.log(err);
-      Alert.alert('Cannot Create', 'Something went wrong', [{ text: 'OK' }]);
+    onError: () => {
+      Alert.alert('Error', 'Something went wrong');
     },
   });
 
@@ -65,14 +68,20 @@ export const usePersonalInformationForm = ({
 
   const handleSave = useCallback(() => {
     const result = PersonalInformationSchema.safeParse(formData);
+
     if (!result.success) {
       const formattedErrors: Record<string, string> = {};
+
       result.error.issues.forEach((err) => {
-        if (err.path[0]) formattedErrors[err.path[0] as string] = err.message;
+        if (err.path[0]) {
+          formattedErrors[err.path[0] as string] = err.message;
+        }
       });
+
       setErrors(formattedErrors);
       return;
     }
+
     mutation.mutate(result.data as PersonalInformation);
   }, [formData, mutation]);
 
@@ -80,10 +89,10 @@ export const usePersonalInformationForm = ({
     formData,
     errors,
     showDatePicker,
-    isLocked,
     setShowDatePicker,
     handleChange,
     handleSave,
     isLoading: mutation.isPending,
+    isLocked,
   };
 };

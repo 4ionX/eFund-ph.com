@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -17,6 +18,7 @@ import { ImagesPath } from '@/shared/constants/images';
 import { Spacing, Typography } from '@/shared/constants/theme';
 import { useResetPassword } from '@/features/auth/hooks/useResetPassword';
 import { router } from 'expo-router';
+import { supabaseClient } from '@/core/api/supabaseClient';
 
 export default function ResetPasswordScreen() {
   const {
@@ -32,6 +34,35 @@ export default function ResetPasswordScreen() {
     errors,
     handleResetPassword,
   } = useResetPassword();
+
+  useEffect(() => {
+    const handleUrl = async (url: string | null) => {
+      if (!url) return;
+
+      try {
+        const { error } = await supabaseClient.auth.exchangeCodeForSession(url);
+
+        if (error) {
+          console.log('Auth error:', error.message);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      handleUrl(window.location.href);
+      return;
+    }
+
+    Linking.getInitialURL().then(handleUrl);
+
+    const sub = Linking.addEventListener('url', ({ url }) => {
+      handleUrl(url);
+    });
+
+    return () => sub.remove();
+  }, []);
 
   return (
     <KeyboardAvoidingView
@@ -114,7 +145,14 @@ export default function ResetPasswordScreen() {
             style={{ marginTop: Spacing.md }}
             onPress={() => router.back()} // closes sheet / go back
           >
-            <ThemedText type="caption" style={{ color: '#007AFF' }}>
+            <ThemedText
+              type="caption"
+              style={{
+                color: '#007AFF',
+                alignItems: 'center',
+                alignSelf: 'center',
+              }}
+            >
               Back to Login
             </ThemedText>
           </TouchableOpacity>
@@ -125,18 +163,42 @@ export default function ResetPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  scrollContent: { flexGrow: 1, paddingTop: Spacing['2xl'] },
-  sheetContent: { padding: Spacing.md, alignItems: 'center', gap: Spacing.xs },
-  logo: { width: 150, height: 150, marginBottom: Spacing.xs },
+  page: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    width: '100%',
+    maxWidth: 480, // 🔥 same as login (mobile-like web)
+    paddingTop: Spacing['2xl'],
+  },
+
+  sheetContent: {
+    padding: Spacing.md,
+    width: '100%',
+    alignSelf: 'center',
+    alignItems: 'stretch', // 🔥 FIX INPUT FULL WIDTH
+    gap: Spacing.xs,
+  },
+  logo: {
+    width: 150,
+    height: 150,
+    marginBottom: Spacing.xs,
+    alignSelf: 'center',
+  },
+
   title: {
     marginBottom: 2,
     fontSize: Typography.size.xl,
     fontFamily: Typography.fontFamily.bold,
+    textAlign: 'center', // 🔥 CENTER FIX
   },
+
   subtitle: {
     marginBottom: Spacing.sm,
     fontSize: Typography.size.base,
     fontFamily: Typography.fontFamily.regular,
+    textAlign: 'center',
   },
   input: { width: '100%' },
 });

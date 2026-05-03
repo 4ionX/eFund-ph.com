@@ -31,7 +31,6 @@ const DocumentsForm = ({ initialData }: any) => {
   const [idImageUrl, setIdImageUrl] = useState<string | null>(null);
   const [businessImageUrl, setBusinessImageUrl] = useState<string | null>(null);
 
-  // safer detection
   const isLocalFile = (value?: string | null) =>
     !!value &&
     (value.startsWith('file://') ||
@@ -39,25 +38,19 @@ const DocumentsForm = ({ initialData }: any) => {
       value.startsWith('blob:') ||
       value.startsWith('data:'));
 
-  // ================= ID IMAGE =================
   useEffect(() => {
     let alive = true;
 
     const load = async () => {
-      if (!formData.idUrl) {
-        setIdImageUrl(null);
-        return;
-      }
+      if (!formData.idUrl) return setIdImageUrl(null);
 
       try {
-        // 🔥 LOCAL FILES (WEB + MOBILE)
         if (isLocalFile(formData.idUrl)) {
           setIdImageUrl(formData.idUrl);
           return;
         }
 
         const url = await getSignedUrl(formData.idUrl);
-
         if (alive) setIdImageUrl(url);
       } catch (err) {
         console.log('ID error:', err);
@@ -65,21 +58,17 @@ const DocumentsForm = ({ initialData }: any) => {
     };
 
     load();
-
     return () => {
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.idUrl]);
-  // ================= BUSINESS IMAGE =================
+
   useEffect(() => {
     let alive = true;
 
     const load = async () => {
-      if (!formData.businessDocumentUrl) {
-        setBusinessImageUrl(null);
-        return;
-      }
+      if (!formData.businessDocumentUrl) return setBusinessImageUrl(null);
 
       try {
         if (isLocalFile(formData.businessDocumentUrl)) {
@@ -88,7 +77,6 @@ const DocumentsForm = ({ initialData }: any) => {
         }
 
         const url = await getSignedUrl(formData.businessDocumentUrl);
-
         if (alive) setBusinessImageUrl(url);
       } catch (err) {
         console.log('Business error:', err);
@@ -96,7 +84,6 @@ const DocumentsForm = ({ initialData }: any) => {
     };
 
     load();
-
     return () => {
       alive = false;
     };
@@ -146,27 +133,26 @@ const DocumentsForm = ({ initialData }: any) => {
   return (
     <ThemedView style={styles.container}>
       <ScrollView keyboardShouldPersistTaps="handled">
-        {/* ID TYPE */}
+        {/* ================= ID TYPE ================= */}
         <ThemedText type="defaultSemiBold">ID Type</ThemedText>
 
-        <ThemedView style={styles.pickerContainer}>
+        <View style={styles.pickerContainer}>
           <Picker
             enabled={!isLocked}
             selectedValue={formData.idType}
             onValueChange={(v) => handleChange('idType', v)}
+            style={styles.picker}
           >
             {PHILIPPINE_ID_TYPES.map((item) => (
               <Picker.Item key={item} label={item} value={item} />
             ))}
           </Picker>
-        </ThemedView>
+        </View>
 
-        {/* ID UPLOAD */}
+        {/* ================= ID UPLOAD ================= */}
         <TouchableOpacity
           onPress={() => pickImage('idUrl')}
           disabled={isLocked}
-          activeOpacity={0.7}
-          delayPressIn={0}
           style={styles.upload}
         >
           {idImageUrl ? (
@@ -183,27 +169,26 @@ const DocumentsForm = ({ initialData }: any) => {
           )}
         </TouchableOpacity>
 
-        {/* BUSINESS TYPE */}
+        {/* ================= BUSINESS TYPE ================= */}
         <ThemedText type="defaultSemiBold">Business Document Type</ThemedText>
 
-        <ThemedView style={styles.pickerContainer}>
+        <View style={styles.pickerContainer}>
           <Picker
             enabled={!isLocked}
             selectedValue={formData.businessDocumentType}
             onValueChange={(v) => handleChange('businessDocumentType', v)}
+            style={styles.picker}
           >
             {BUSINESS_DOCUMENT_TYPES.map((item) => (
               <Picker.Item key={item} label={item} value={item} />
             ))}
           </Picker>
-        </ThemedView>
+        </View>
 
-        {/* BUSINESS UPLOAD */}
+        {/* ================= BUSINESS UPLOAD ================= */}
         <TouchableOpacity
           onPress={() => pickImage('businessDocumentUrl')}
           disabled={isLocked}
-          activeOpacity={0.7}
-          delayPressIn={0}
           style={styles.upload}
         >
           {businessImageUrl ? (
@@ -220,7 +205,7 @@ const DocumentsForm = ({ initialData }: any) => {
           )}
         </TouchableOpacity>
 
-        {/* SAVE */}
+        {/* ================= SAVE ================= */}
         {!initialData && (
           <View style={styles.footer}>
             <AnimatedButton
@@ -261,13 +246,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
+  /* 🔥 CLEAN PICKER WRAPPER */
   pickerContainer: {
     borderWidth: 1,
+    borderColor: '#ddd',
     borderRadius: 6,
     overflow: 'hidden',
-    paddingVertical: Platform.OS === 'ios' ? 8 : 0,
-    marginBottom: 40,
     marginTop: 8,
+    marginBottom: 20,
+
+    height: 48,
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+
+  /* 🔥 removes inner thick border / underline */
+  picker: {
+    height: 48,
+    width: '100%',
+    borderWidth: 0,
+    elevation: 0,
   },
 
   footer: {

@@ -26,6 +26,7 @@ const PersonalInformationForm = ({ initialData }: Props) => {
     isLoading,
     isLocked,
   } = usePersonalInformationForm({ initialData: initialData });
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <ThemedView style={styles.container}>
@@ -68,55 +69,90 @@ const PersonalInformationForm = ({ initialData }: Props) => {
 
         {/* Birth Date */}
         <ThemedText type="defaultSemiBold">Birth Date</ThemedText>
-        <ThemedTextInput
-          placeholder="YYYY-MM-DD"
-          value={formData.birthDate ?? ''}
-          editable={false}
-          onPressIn={() => setShowDatePicker(true)}
-          error={!!errors.birthDate}
-        />
-        {showDatePicker && (
-          <DateTimePicker
-            value={
-              formData.birthDate ? new Date(formData.birthDate) : new Date()
-            }
-            mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            maximumDate={new Date()} // cannot pick future dates
-            minimumDate={new Date(1990, 0, 1)} // Jan 1, 1990
-            onChange={(event, selectedDate) => {
-              setShowDatePicker(false);
-              if (selectedDate) {
-                handleChange(
-                  'birthDate',
-                  selectedDate.toISOString().split('T')[0],
-                );
-              }
+        {Platform.OS === 'web' ? (
+          <input
+            type="date"
+            value={formData.birthDate || today}
+            onChange={(e) => handleChange('birthDate', e.target.value)}
+            style={{
+              padding: 12,
+              borderRadius: 8,
+              border: errors.birthDate ? '1px solid red' : '1px solid #ccc',
+              height: 30,
+              marginBottom: 10,
             }}
           />
+        ) : (
+          <>
+            <ThemedTextInput
+              value={formData.birthDate ?? ''}
+              editable={false}
+              onPressIn={() => setShowDatePicker(true)}
+              error={!!errors.birthDate}
+            />
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={
+                  formData.birthDate ? new Date(formData.birthDate) : new Date()
+                }
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                maximumDate={new Date()}
+                minimumDate={new Date(1990, 0, 1)}
+                onChange={(event, selectedDate) => {
+                  setShowDatePicker(false);
+                  if (selectedDate) {
+                    handleChange(
+                      'birthDate',
+                      selectedDate.toISOString().split('T')[0],
+                    );
+                  }
+                }}
+              />
+            )}
+          </>
         )}
 
         {/* Civil Status */}
         <ThemedText type="defaultSemiBold">Civil Status</ThemedText>
-        <ThemedView
-          style={[
-            styles.pickerContainer,
-            { borderColor: errors.civilStatus ? 'red' : '#ccc' },
-          ]}
-        >
-          <Picker
-            style={styles.picker}
-            itemStyle={{ height: 50 }}
-            enabled={!isLocked}
-            selectedValue={formData.civilStatus}
-            onValueChange={(val) => handleChange('civilStatus', val)}
+        {Platform.OS === 'web' ? (
+          <select
+            value={formData.civilStatus}
+            onChange={(e) => handleChange('civilStatus', e.target.value)}
+            style={{
+              padding: 12,
+              borderRadius: 6,
+              border: errors.civilStatus ? '1px solid red' : '1px solid #ccc',
+              width: '100%',
+              height: 40,
+              marginBottom: 10,
+            }}
           >
-            <Picker.Item label="Single" value="Single" />
-            <Picker.Item label="Married" value="Married" />
-            <Picker.Item label="Widowed" value="Widowed" />
-            <Picker.Item label="Separated" value="Separated" />
-          </Picker>
-        </ThemedView>
+            <option value="Single">Single</option>
+            <option value="Married">Married</option>
+            <option value="Widowed">Widowed</option>
+            <option value="Separated">Separated</option>
+          </select>
+        ) : (
+          <View
+            style={[
+              styles.pickerContainer,
+              { borderColor: errors.civilStatus ? 'red' : '#ccc' },
+            ]}
+          >
+            <Picker
+              selectedValue={formData.civilStatus}
+              onValueChange={(val) => handleChange('civilStatus', val)}
+              enabled={!isLocked}
+            >
+              <Picker.Item label="Single" value="Single" />
+              <Picker.Item label="Married" value="Married" />
+              <Picker.Item label="Widowed" value="Widowed" />
+              <Picker.Item label="Separated" value="Separated" />
+            </Picker>
+          </View>
+        )}
         {errors.civilStatus && (
           <ThemedText type="default" style={{ color: 'red' }}>
             {errors.civilStatus}
