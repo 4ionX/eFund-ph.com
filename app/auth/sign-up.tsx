@@ -154,6 +154,7 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
   page: {
     flex: 1,
+    alignItems: 'center',
   },
 
   scrollContent: {

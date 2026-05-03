@@ -164,7 +164,6 @@ const styles = StyleSheet.create({
   page: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
 
   scrollContent: {

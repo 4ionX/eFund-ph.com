@@ -165,6 +165,7 @@ export default function ResetPasswordScreen() {
 const styles = StyleSheet.create({
   page: {
     flex: 1,
+    alignItems: 'center',
   },
   scrollContent: {
     flexGrow: 1,
