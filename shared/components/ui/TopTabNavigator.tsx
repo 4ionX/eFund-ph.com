@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { ThemedText } from '../theme/ThemedText';
 import { ThemedView } from '../theme/ThemedView';
 import { Colors } from '@/shared/constants/theme';
@@ -15,28 +15,14 @@ const TopTabNavigator = <T extends string>({
   selectedTab,
   handleTabPress,
 }: Props<T>) => {
-  const { width } = useWindowDimensions();
-
-  const isMobile = width < 768;
-  const isFewTabs = STATUS_TABS.length <= 2;
-
   const [textWidths, setTextWidths] = useState<Record<string, number>>({});
 
   return (
-    <ThemedView
-      style={{
-        flexDirection: 'row',
-        justifyContent: isMobile ? 'flex-start' : 'center',
-        paddingHorizontal: 10,
-      }}
-    >
-      <View
-        style={{
-          flexDirection: 'row',
-          maxWidth: 600, // 🔥 important for desktop
-          width: '100%',
-          justifyContent: isFewTabs ? 'space-evenly' : 'flex-start',
-        }}
+    <ThemedView style={styles.wrapper}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabRow}
       >
         {STATUS_TABS.map((item, index) => {
           const isActive = selectedTab === item;
@@ -45,20 +31,12 @@ const TopTabNavigator = <T extends string>({
             <TouchableOpacity
               key={String(item)}
               onPress={() => handleTabPress(item, index)}
-              style={{
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingVertical: 10,
-                marginHorizontal: isFewTabs ? 0 : 12,
-              }}
+              style={styles.tabItem}
             >
               <ThemedText
                 onLayout={(e) => {
                   const { width } = e.nativeEvent.layout;
-                  setTextWidths((prev) => ({
-                    ...prev,
-                    [item]: width,
-                  }));
+                  setTextWidths((prev) => ({ ...prev, [item]: width }));
                 }}
                 style={{
                   fontWeight: isActive ? '700' : '400',
@@ -82,9 +60,27 @@ const TopTabNavigator = <T extends string>({
             </TouchableOpacity>
           );
         })}
-      </View>
+      </ScrollView>
     </ThemedView>
   );
 };
 
 export default TopTabNavigator;
+const styles = StyleSheet.create({
+  wrapper: {
+    width: '100%',
+  },
+
+  tabRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 10,
+    alignItems: 'center',
+  },
+
+  tabItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    marginHorizontal: 12,
+  },
+});
