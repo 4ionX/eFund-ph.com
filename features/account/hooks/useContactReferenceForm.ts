@@ -62,7 +62,7 @@ export const useContactReferenceForm = ({
         queryKey: ['contactReferences'],
       });
       setContactInfo(savedData);
-      router.back();
+      router.push('/account/documents');
     },
 
     onError: (err: any) => {

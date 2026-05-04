@@ -82,30 +82,10 @@ function RootLayoutNav() {
                       }}
                     />
                     <Stack.Screen
-                      name="account/personal-information"
+                      name="account"
                       options={{ headerShown: false }}
                     />
-                    <Stack.Screen
-                      name="account/co-borrower"
-                      options={{
-                        animation: 'slide_from_right',
-                        headerShown: false,
-                      }}
-                    />
-                    <Stack.Screen
-                      name="account/contact-references"
-                      options={{
-                        animation: 'slide_from_right',
-                        headerShown: false,
-                      }}
-                    />
-                    <Stack.Screen
-                      name="account/documents"
-                      options={{
-                        animation: 'slide_from_right',
-                        headerShown: false,
-                      }}
-                    />
+
                     <Stack.Screen
                       name="guidelines/loan-steps"
                       options={{

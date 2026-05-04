@@ -65,8 +65,6 @@ export const useDocumentsForm = ({
       });
 
       setErrors({});
-
-      router.back();
     },
     onError: () => {
       Alert.alert('Error', 'Something went wrong');

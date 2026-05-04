@@ -1,4 +1,3 @@
-import { ThemedSafeAreaView } from '@/shared/components/theme/ThemedSafeAreaView';
 import TabHeader from '@/shared/components/ui/TabHeader';
 import { Spacing } from '@/shared/constants/theme';
 import { router } from 'expo-router';
@@ -12,22 +11,17 @@ import {
 
 import { useContactReferenceStore } from '@/store/contactReference.store';
 import ContactReferenceForm from '@/features/account/components/ContactReferenceForm';
+import { ThemedView } from '@/shared/components/theme/ThemedView';
 
 const ContactReferencesScreen = () => {
   const { contactInfo } = useContactReferenceStore();
 
   return (
-    <ThemedSafeAreaView>
+    <ThemedView style={{ flex: 1 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <TabHeader
-          title="Contact References"
-          leftIconName="chevron-back-outline"
-          onBackPress={() => router.back()}
-        />
-
         <ScrollView
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
@@ -36,7 +30,7 @@ const ContactReferencesScreen = () => {
           <ContactReferenceForm initialData={contactInfo || []} />
         </ScrollView>
       </KeyboardAvoidingView>
-    </ThemedSafeAreaView>
+    </ThemedView>
   );
 };
 

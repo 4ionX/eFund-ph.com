@@ -55,7 +55,7 @@ export const useCoBorrowerForm = ({
         queryKey: ['coBorrowers'],
       });
       setCoBorrowerInfo(savedData);
-      router.back();
+      router.push('/account/contact-references');
     },
     onError: (err: any) => {
       console.log(err);

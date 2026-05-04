@@ -51,7 +51,7 @@ export const usePersonalInformationForm = ({
       });
 
       setPersonalInfo(savedData);
-      router.back();
+      router.push('/account/co-borrower');
     },
     onError: () => {
       Alert.alert('Error', 'Something went wrong');

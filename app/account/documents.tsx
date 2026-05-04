@@ -1,7 +1,5 @@
-import { ThemedSafeAreaView } from '@/shared/components/theme/ThemedSafeAreaView';
-import TabHeader from '@/shared/components/ui/TabHeader';
 import { Spacing } from '@/shared/constants/theme';
-import { router } from 'expo-router';
+
 import React from 'react';
 import {
   KeyboardAvoidingView,
@@ -12,22 +10,17 @@ import {
 
 import { useDocumentInformationStore } from '@/store/documents.store';
 import DocumentsForm from '@/features/account/components/DocumentsForm';
+import { ThemedView } from '@/shared/components/theme/ThemedView';
 
 const DocumentsScreen = () => {
   const { documentsInfo } = useDocumentInformationStore();
 
   return (
-    <ThemedSafeAreaView>
+    <ThemedView style={{ flex: 1 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <TabHeader
-          title="Documents Upload"
-          leftIconName="chevron-back-outline"
-          onBackPress={() => router.back()}
-        />
-
         <ScrollView
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
@@ -36,7 +29,7 @@ const DocumentsScreen = () => {
           <DocumentsForm initialData={documentsInfo ?? undefined} />
         </ScrollView>
       </KeyboardAvoidingView>
-    </ThemedSafeAreaView>
+    </ThemedView>
   );
 };
 

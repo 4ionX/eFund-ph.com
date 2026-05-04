@@ -1,4 +1,3 @@
-import { ThemedSafeAreaView } from '@/shared/components/theme/ThemedSafeAreaView';
 import TabHeader from '@/shared/components/ui/TabHeader';
 import { Spacing } from '@/shared/constants/theme';
 import { router } from 'expo-router';
@@ -12,22 +11,17 @@ import {
 
 import { useCoBorrowerStore } from '@/store/coBorrower.store';
 import CoBorrowerForm from '@/features/account/components/CoBorrowerForm';
+import { ThemedView } from '@/shared/components/theme/ThemedView';
 
 const CoBorrowerScreen = () => {
   const { coBorrowerInfo } = useCoBorrowerStore();
 
   return (
-    <ThemedSafeAreaView>
+    <ThemedView style={{ flex: 1 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <TabHeader
-          title="Co-Borrower Information"
-          leftIconName="chevron-back-outline"
-          onBackPress={() => router.back()}
-        />
-
         <ScrollView
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
@@ -36,7 +30,7 @@ const CoBorrowerScreen = () => {
           <CoBorrowerForm initialData={coBorrowerInfo ?? undefined} />
         </ScrollView>
       </KeyboardAvoidingView>
-    </ThemedSafeAreaView>
+    </ThemedView>
   );
 };
 

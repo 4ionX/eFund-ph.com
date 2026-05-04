@@ -30,19 +30,34 @@ import { useFetchDocuments } from '@/features/account/hooks/useFetchDocuments';
 
 export default function HomeScreen() {
   const { user } = useAuthStore();
-  const { isLoading: personalInfoLoading, refetch: refetchPersonal } =
-    useFetchPersonalInformation(user?.id);
+  const {
+    data: personalInfo,
+    isLoading: personalInfoLoading,
+    refetch: refetchPersonal,
+  } = useFetchPersonalInformation(user?.id);
 
-  const { isLoading: coBorrowerLoading, refetch: refetchCoBorrower } =
-    useFetchCoBorrowers(user?.id);
+  const {
+    data: coBorrowerInfo,
+    isLoading: coBorrowerLoading,
+    refetch: refetchCoBorrower,
+  } = useFetchCoBorrowers(user?.id);
 
-  const { isLoading: contactReferenceLoading, refetch: refetchContact } =
-    useFetchContactReference(user?.id);
+  const {
+    data: contactReferenceInfo,
+    isLoading: contactReferenceLoading,
+    refetch: refetchContact,
+  } = useFetchContactReference(user?.id);
 
-  const { isLoading: documentsLoading, refetch: refetchDocuments } =
-    useFetchDocuments(user?.id);
+  const {
+    data: documentsInfo,
+    isLoading: documentsLoading,
+    refetch: refetchDocuments,
+  } = useFetchDocuments(user?.id);
   const { handleApplyNow } = useLoanNavigation();
   const safeNavigate = useNavigationLock();
+
+  const isCompleteRegistration =
+    personalInfo && coBorrowerInfo && contactReferenceInfo && documentsInfo;
 
   useEffect(() => {
     if (!user?.id) return;
@@ -131,8 +146,17 @@ export default function HomeScreen() {
                 />
               ) : (
                 <AnimatedButton
-                  label="Apply Now"
-                  disabled={personalInfoLoading || coBorrowerLoading}
+                  label={
+                    isCompleteRegistration
+                      ? 'Apply Now'
+                      : 'Complete Registration'
+                  }
+                  disabled={
+                    contactReferenceLoading ||
+                    documentsLoading ||
+                    personalInfoLoading ||
+                    coBorrowerLoading
+                  }
                   onPress={() => handleApplyNow()}
                 />
               )}
