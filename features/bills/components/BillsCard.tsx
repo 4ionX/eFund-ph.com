@@ -68,7 +68,7 @@ const BillsCard = ({
               params: { loanAccountId },
             })
           }
-          label="Pay Bills"
+          label="Payment Schedules"
         />
       )}
     </ThemedView>
