@@ -31,7 +31,7 @@ const LoanHistoryScreen = () => {
     <ThemedSafeAreaView style={styles.container}>
       <TabHeader
         leftIconName="chevron-back-outline"
-        title="Loan Applications"
+        title="Loan Status"
         onBackPress={() => router.back()}
       />
 
