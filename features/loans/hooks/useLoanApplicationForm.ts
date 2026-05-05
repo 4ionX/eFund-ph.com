@@ -14,6 +14,7 @@ import type {
   Provider,
 } from '../types/loans';
 import { LoanApplicationSchema } from '../validations/loan-application.validation';
+import { supabaseClient } from '@/core/api/supabaseClient';
 
 export const useLoanApplicationForm = () => {
   // ======================
@@ -38,6 +39,22 @@ export const useLoanApplicationForm = () => {
   // GLOBAL
   // ======================
   const { user } = useAuthStore();
+
+  const checkForReleaseLoan = async (userId: string) => {
+    const { data, error } = await supabaseClient
+      .from('loan_contracts')
+      .select('id, status')
+      .eq('user_id', userId)
+      .eq('status', 'For Release')
+      .limit(1);
+
+    if (error) {
+      console.log('❌ checkForReleaseLoan error:', error.message);
+      return false; // fail-safe: don't block user if API fails
+    }
+
+    return (data?.length ?? 0) > 0;
+  };
 
   // ======================
   // MUTATION
@@ -81,9 +98,27 @@ export const useLoanApplicationForm = () => {
   // ======================
   // SUBMIT
   // ======================
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     const provider =
       disbursementMethod === 'eWallet' ? selectedWallet : selectedBank;
+
+    if (!user) {
+      showAlert(
+        'Error',
+        'User not authenticated, Please check our internet connection and try again.',
+      );
+      return;
+    }
+
+    const hasForRelease = await checkForReleaseLoan(user.id);
+
+    if (hasForRelease) {
+      showAlert(
+        'Blocked',
+        'You already have a loan for release. Please wait for it to be processed.',
+      );
+      return;
+    }
 
     // ❌ VALIDATION GUARD
     if (!provider) {
@@ -120,11 +155,12 @@ export const useLoanApplicationForm = () => {
 
     mutation.mutate(result.data as LoanApplication);
   }, [
-    loanType,
-    loanAmount,
     disbursementMethod,
     selectedWallet,
     selectedBank,
+    user,
+    loanType,
+    loanAmount,
     accountName,
     accountNumber,
     mutation,
