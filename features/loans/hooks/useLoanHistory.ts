@@ -1,5 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
-import type { LoanApplication } from '@/features/loans/types/loans';
+import { useCallback, useMemo } from 'react';
 import { useFetchLoanApplications } from './useFetchLoanApplication';
 import useLoanTabNavigator from './useLoanTabNavigator';
 
@@ -13,32 +12,38 @@ export const useLoanHistory = ({ userId }: Params) => {
     actions: { handleTabPress },
   } = useLoanTabNavigator();
 
-  const [refreshing, setRefreshing] = useState(false);
+  const { data, fetchNextPage, hasNextPage, isLoading, isFetching, refetch } =
+    useFetchLoanApplications(userId, 4, selectedTab);
 
-  const { data, refetch, isLoading } = useFetchLoanApplications(userId, 0, 10);
+  const loans = useMemo(() => {
+    return data?.pages?.flatMap((p) => p.data) ?? [];
+  }, [data]);
 
-  const filteredLoans = useMemo(() => {
-    const loans = data?.data ?? [];
+  const onChangeTab = useCallback(
+    (tab: string) => {
+      const index = tabs.findIndex((t) => t === tab);
+      handleTabPress(tab as any, index);
+    },
+    [handleTabPress, tabs],
+  );
 
-    return loans.filter((loan: LoanApplication) => loan.status === selectedTab);
-  }, [data?.data, selectedTab]);
+  const loadMore = useCallback(() => {
+    if (!hasNextPage || isFetching) return;
+    fetchNextPage();
+  }, [hasNextPage, isFetching, fetchNextPage]);
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await refetch();
-    } finally {
-      setRefreshing(false);
-    }
+  const onRefresh = useCallback(() => {
+    refetch();
   }, [refetch]);
 
   return {
     tabs,
     selectedTab,
-    handleTabPress,
-    loans: filteredLoans,
-    refreshing,
-    onRefresh,
+    handleTabPress: onChangeTab,
+    loans,
     isLoading,
+    isFetching,
+    loadMore,
+    onRefresh,
   };
 };

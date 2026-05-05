@@ -1,45 +1,32 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { fetchLoanApplications } from '../api/loanApplication.api';
-import type { LoanApplication, LoanStatus } from '../types/loans';
-
-const mapSnakeToCamel = (data: any): LoanApplication => ({
-  id: data.id,
-
-  loanType: data.loan_type,
-  loanAmount: data.loan_amount,
-
-  disbursementMethod: data.disbursement_method,
-  accountName: data.account_name,
-  accountNumber: data.account_number,
-
-  provider: data.provider,
-  status: data.status as LoanStatus,
-
-  createdAt: data.created_at,
-  updatedAt: data.updated_at,
-});
+import { mapSnakeToCamel } from '@/shared/utils/makeCamelCase';
 
 export const useFetchLoanApplications = (
   userId?: string,
-  page: number = 0,
   limit: number = 10,
+  status?: string,
 ) => {
-  return useQuery({
-    queryKey: ['loanApplications', userId, page, limit],
+  return useInfiniteQuery({
+    queryKey: ['loanApplications', userId, status],
     enabled: !!userId,
+    initialPageParam: 0,
 
-    queryFn: async () => {
-      const offset = page * limit;
+    queryFn: async ({ pageParam = 0 }) => {
+      const offset = pageParam * limit;
 
-      const res = await fetchLoanApplications(userId!, limit, offset);
+      const res = await fetchLoanApplications(userId!, limit, offset, status);
 
       return {
-        ...res,
         data: res.data.map(mapSnakeToCamel),
+        count: res.count,
       };
     },
 
-    staleTime: 1000 * 60 * 5,
-    placeholderData: (prev) => prev,
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.data.length < limit) return undefined;
+
+      return allPages.length;
+    },
   });
 };

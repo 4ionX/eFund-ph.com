@@ -3,7 +3,7 @@ import { gql } from 'graphql-request';
 export const GET_LOAN_APPLICATION = gql`
   query GetLoanApplications($user_id: UUID!, $limit: Int!, $offset: Int!) {
     loan_applicationsCollection(
-      filter: { user_id: { eq: $user_id } }
+      filter: { user_id: { eq: $user_id }, status: { eq: $status } }
       first: $limit
       offset: $offset
       orderBy: { created_at: DescNullsLast }

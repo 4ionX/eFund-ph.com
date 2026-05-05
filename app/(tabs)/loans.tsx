@@ -1,28 +1,27 @@
 import { router } from 'expo-router';
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 
 import { ThemedSafeAreaView } from '@/shared/components/theme/ThemedSafeAreaView';
 import TabHeader from '@/shared/components/ui/TabHeader';
 import TopTabNavigator from '@/shared/components/ui/TopTabNavigator';
-
 import { useAuthStore } from '@/store/auth.store';
 
-import { ThemedView } from '@/shared/components/theme/ThemedView';
-import { ThemedText } from '@/shared/components/theme/ThemedText';
 import LoanListCard from '@/features/loans/components/LoanListCard';
 import { useLoanHistory } from '@/features/loans/hooks/useLoanHistory';
+import { ThemedText } from '@/shared/components/theme/ThemedText';
+import { ThemedView } from '@/shared/components/theme/ThemedView';
 
 const LoanHistoryScreen = () => {
   const user = useAuthStore((s) => s.user);
 
   const {
     tabs,
-    isLoading,
     selectedTab,
     handleTabPress,
     loans,
-    refreshing,
+    isLoading,
     onRefresh,
+    loadMore,
   } = useLoanHistory({
     userId: user?.id,
   });
@@ -35,7 +34,6 @@ const LoanHistoryScreen = () => {
         onBackPress={() => router.back()}
       />
 
-      {/* FIX: wrap tabs + list in flex container */}
       <ThemedView style={styles.content}>
         <TopTabNavigator
           STATUS_TABS={tabs}
@@ -44,20 +42,22 @@ const LoanHistoryScreen = () => {
         />
 
         <FlatList
-          style={styles.list}
+          style={{ flex: 1 }}
           data={loans}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={[
-            styles.listContainer,
-            loans.length === 0 && { flex: 1 },
-          ]}
-          refreshing={refreshing || isLoading}
+          contentContainerStyle={[styles.listContainer, { flexGrow: 1 }]}
+          refreshing={isLoading}
           onRefresh={onRefresh}
-          ListFooterComponent={<ThemedView style={{ height: 50 }} />}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.3}
           ListEmptyComponent={
-            <ThemedView style={styles.emptyContainer}>
-              <ThemedText>{`No ${selectedTab} loan applications yet`}</ThemedText>
-            </ThemedView>
+            isLoading ? null : (
+              <ThemedView style={styles.emptyContainer}>
+                <ThemedText>
+                  {`No ${selectedTab} loan applications yet`}
+                </ThemedText>
+              </ThemedView>
+            )
           }
           renderItem={({ item }) => (
             <LoanListCard
@@ -69,6 +69,7 @@ const LoanHistoryScreen = () => {
               showAction={item.status === 'For Approval'}
             />
           )}
+          ListFooterComponent={() => <View style={{ height: 50 }} />}
         />
       </ThemedView>
     </ThemedSafeAreaView>
@@ -78,23 +79,12 @@ const LoanHistoryScreen = () => {
 export default LoanHistoryScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1, // 🔥 VERY IMPORTANT
-  },
-
-  content: {
-    flex: 1, // 🔥 allows FlatList to take remaining space
-  },
-
-  list: {
-    flex: 1, // 🔥 enables scrolling on web
-  },
-
+  container: { flex: 1 },
+  content: { flex: 1 },
   listContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',

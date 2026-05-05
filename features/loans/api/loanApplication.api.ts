@@ -8,12 +8,15 @@ export const fetchLoanApplications = async (
   userId: string,
   limit: number,
   offset: number,
+  status?: string,
 ) => {
   const client = await graphql();
+
   const res = await client.request(GET_LOAN_APPLICATION, {
     user_id: userId,
     limit,
     offset,
+    status,
   });
 
   const nodes =
