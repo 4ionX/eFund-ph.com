@@ -25,7 +25,7 @@ export const createLoanApplication = async (
     ])
     .select()
     .single();
-
+  console.log(error);
   if (error) throw error;
 
   return result;

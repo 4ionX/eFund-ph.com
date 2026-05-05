@@ -22,6 +22,19 @@ export const useFileUpload = () => {
 
   // 🔥 SAFE FOR WEB + MOBILE
   const uriToBlob = async (uri: string) => {
+    // ✅ WEB (Safari / Chrome)
+    if (typeof window !== 'undefined') {
+      const res = await fetch(uri);
+      const blob = await res.blob();
+
+      if (!blob || blob.size === 0) {
+        throw new Error('Web upload failed: empty blob');
+      }
+
+      return blob;
+    }
+
+    // ✅ MOBILE (Expo)
     const res = await fetch(uri);
     return await res.blob();
   };

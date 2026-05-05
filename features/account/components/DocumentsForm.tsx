@@ -1,12 +1,6 @@
 import { Picker } from '@react-native-picker/picker';
 import React, { useEffect, useState } from 'react';
-import {
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/shared/components/theme/ThemedText';
 import { ThemedView } from '@/shared/components/theme/ThemedView';
@@ -134,7 +128,7 @@ const DocumentsForm = ({ initialData }: any) => {
     <ThemedView style={styles.container}>
       <ScrollView keyboardShouldPersistTaps="handled">
         {/* ================= ID TYPE ================= */}
-        <ThemedText type="defaultSemiBold">ID Type</ThemedText>
+        <ThemedText type="defaultSemiBold">ID Type </ThemedText>
 
         <View style={styles.pickerContainer}>
           <Picker

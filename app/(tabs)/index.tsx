@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -27,6 +27,10 @@ import { useFetchPersonalInformation } from '@/features/account/hooks/useFetchPe
 import { useLoanNavigation } from '@/features/home/hooks/useLoanNavigation';
 import { useFetchContactReference } from '@/features/account/hooks/useFetchContactReference';
 import { useFetchDocuments } from '@/features/account/hooks/useFetchDocuments';
+import { useNotificationsQuery } from '@/features/notifications/hooks/useNotificationsQuery';
+import { useNotificationsRealtime } from '@/features/notifications/hooks/useNotificationsRealtime';
+import { useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/shared/context/ToastProvider';
 
 export default function HomeScreen() {
   const { user } = useAuthStore();
@@ -83,6 +87,39 @@ export default function HomeScreen() {
     refetchPersonal,
     user?.id,
   ]);
+  const userId = user?.id;
+
+  const { data: notifications = [] } = useNotificationsQuery(userId);
+
+  const queryClient = useQueryClient();
+  useNotificationsRealtime(userId, () => {
+    queryClient.invalidateQueries({
+      queryKey: ['notifications', userId],
+    });
+  });
+  const unreadCount = notifications.filter((n: any) => !n.is_read).length;
+  const shownIds = useRef<Set<string>>(new Set());
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    if (!notifications?.length) return;
+
+    const latest = [...notifications]
+      .filter((n: any) => !n.is_read)
+      .sort(
+        (a: any, b: any) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      )[0];
+
+    if (latest && !shownIds.current.has(latest.id)) {
+      shownIds.current.add(latest.id);
+
+      showToast({
+        title: latest.title,
+        message: latest.message,
+      });
+    }
+  }, [notifications, showToast]);
 
   return (
     <ThemedSafeAreaView style={styles.container}>
@@ -92,7 +129,11 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
           stickyHeaderIndices={[0]}
         >
-          <StickyHeader title="eFund" rightIcon="notifications-outline" />
+          <StickyHeader
+            title="eFund"
+            rightIcon="notifications-outline"
+            badgeCount={unreadCount}
+          />
           <Field>
             <AnimatedCard>
               <ThemedText type="defaultSemiBold">Loan Offer</ThemedText>

@@ -2,8 +2,8 @@
 
 import { useAuthStore } from '@/store/auth.store';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert } from 'react-native';
 
 import { useDocumentInformationStore } from '@/store/documents.store';
@@ -31,6 +31,12 @@ export const useDocumentsForm = ({
       businessDocumentUrl: null,
     },
   );
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 

@@ -2,7 +2,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { usePersonalInformationStore } from '@/store/personalInformation.store';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import type { PersonalInformation } from '../types/personal-information';
 import { createPersonalInformation } from '../api/personalInformation.mutations';
@@ -32,6 +32,11 @@ export const usePersonalInformationForm = ({
       socialMediaLink: '',
     },
   );
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showDatePicker, setShowDatePicker] = useState(false);

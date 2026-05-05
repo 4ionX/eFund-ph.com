@@ -15,7 +15,7 @@ import { ThemedView } from '@/shared/components/theme/ThemedView';
 
 const CoBorrowerScreen = () => {
   const { coBorrowerInfo } = useCoBorrowerStore();
-
+  console.log(coBorrowerInfo);
   return (
     <ThemedView style={{ flex: 1 }}>
       <KeyboardAvoidingView

@@ -1,3 +1,8 @@
+import React, { useEffect, useRef } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { markAsRead } from '@/features/notifications/api/markAsRead';
+import { useNotificationsQuery } from '@/features/notifications/hooks/useNotificationsQuery';
 import { ThemedSafeAreaView } from '@/shared/components/theme/ThemedSafeAreaView';
 import { ThemedText } from '@/shared/components/theme/ThemedText';
 import TabHeader from '@/shared/components/ui/TabHeader';
@@ -5,52 +10,45 @@ import { Colors, Spacing } from '@/shared/constants/theme';
 import { useThemeColor } from '@/shared/hooks/theme/useThemeColor';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-
-const notifications = [
-  {
-    id: 1,
-    type: 'success',
-    title: 'Loan Approved',
-    message: 'Your loan application has been approved.',
-    time: '2 hours ago',
-    icon: 'checkmark-circle',
-  },
-  {
-    id: 2,
-    type: 'info',
-    title: 'Upload Documents',
-    message: 'Please upload your missing documents.',
-    time: '1 day ago',
-    icon: 'document',
-  },
-  {
-    id: 3,
-    type: 'info',
-    title: 'Loan For Approval',
-    message: 'Your loan is currently under review.',
-    time: '2 days ago',
-    icon: 'time',
-  },
-  {
-    id: 4,
-    type: 'warning',
-    title: 'Overdue Payment',
-    message: 'Your payment is overdue.',
-    time: '2 days ago',
-    icon: 'alert-circle',
-  },
-];
 
 const typeColors: Record<string, string> = {
-  info: Colors.semantic.info,
-  success: Colors.semantic.success,
-  warning: Colors.semantic.warning,
+  Info: Colors.semantic.info,
+  Success: Colors.semantic.success,
+  Warning: Colors.semantic.warning,
 };
 
 const NotificationScreen = () => {
   const cardColor = useThemeColor({}, 'card');
+  const userId = useAuth()?.user?.id;
+
+  const { data = [], refetch } = useNotificationsQuery(userId);
+
+  const hasMarked = useRef(false);
+
+  // ================================
+  // AUTO MARK AS READ ON ENTER
+  // ================================
+  useEffect(() => {
+    if (!data?.length) return;
+    if (hasMarked.current) return;
+
+    const unreadIds = data.filter((n: any) => !n.is_read).map((n: any) => n.id);
+
+    if (unreadIds.length === 0) return;
+
+    hasMarked.current = true;
+
+    const markAll = async () => {
+      try {
+        await Promise.all(unreadIds.map((id: string) => markAsRead(id)));
+        refetch();
+      } catch (err) {
+        console.log('Mark as read error:', err);
+      }
+    };
+
+    markAll();
+  }, [data, refetch]);
 
   return (
     <ThemedSafeAreaView style={{ flex: 1 }}>
@@ -61,25 +59,46 @@ const NotificationScreen = () => {
       />
 
       <ScrollView contentContainerStyle={styles.container}>
-        {notifications.map((item) => (
-          <View
-            key={item.id}
-            style={[styles.card, { backgroundColor: cardColor }]}
-          >
-            <View style={styles.row}>
-              <Ionicons
-                name={item.icon as any}
-                size={24}
-                color={typeColors[item.type]}
-              />
-              <View style={styles.textContainer}>
-                <ThemedText type="defaultSemiBold">{item.title}</ThemedText>
-                <ThemedText type="default">{item.message}</ThemedText>
-                <ThemedText type="caption">{item.time}</ThemedText>
+        {data.length === 0 ? (
+          <ThemedText>No notifications yet</ThemedText>
+        ) : (
+          data.map((item: any) => (
+            <View
+              key={item.id}
+              style={[
+                styles.card,
+                {
+                  backgroundColor: cardColor,
+                  opacity: item.is_read ? 0.6 : 1,
+                },
+              ]}
+            >
+              <View style={styles.row}>
+                <Ionicons
+                  name={
+                    item.type === 'Success'
+                      ? 'checkmark-circle'
+                      : item.type === 'Warning'
+                        ? 'alert-circle'
+                        : 'information-circle'
+                  }
+                  size={24}
+                  color={typeColors[item.type] || Colors.semantic.info}
+                />
+
+                <View style={styles.textContainer}>
+                  <ThemedText type="defaultSemiBold">{item.title}</ThemedText>
+
+                  <ThemedText type="default">{item.message}</ThemedText>
+
+                  <ThemedText type="caption">
+                    {new Date(item.created_at).toLocaleString()}
+                  </ThemedText>
+                </View>
               </View>
             </View>
-          </View>
-        ))}
+          ))
+        )}
       </ScrollView>
     </ThemedSafeAreaView>
   );

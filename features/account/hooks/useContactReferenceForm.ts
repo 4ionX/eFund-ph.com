@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/store/auth.store';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Alert } from 'react-native';
 import type { ContactReference } from '../types/contact-reference';
@@ -39,6 +39,12 @@ export const useContactReferenceForm = ({
 }) => {
   const { user } = useAuthStore();
   const { setContactInfo } = useContactReferenceStore();
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const [formData, setFormData] = useState<ContactReference[]>(
     normalizeReferences(initialData),
