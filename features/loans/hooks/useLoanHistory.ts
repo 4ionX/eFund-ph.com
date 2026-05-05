@@ -13,7 +13,7 @@ export const useLoanHistory = ({ userId }: Params) => {
   } = useLoanTabNavigator();
 
   const { data, fetchNextPage, hasNextPage, isLoading, isFetching, refetch } =
-    useFetchLoanApplications(userId, 4, selectedTab);
+    useFetchLoanApplications(userId, 10, selectedTab);
 
   const loans = useMemo(() => {
     return data?.pages?.flatMap((p) => p.data) ?? [];

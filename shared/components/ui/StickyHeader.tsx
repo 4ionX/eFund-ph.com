@@ -66,6 +66,8 @@ const styles = StyleSheet.create({
   iconButton: {
     padding: 6,
     position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // 🔥 BADGE STYLE
