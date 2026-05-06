@@ -17,6 +17,9 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppContainer from '@/shared/components/ui/AppContainer';
 import { ToastProvider } from '@/shared/context/ToastProvider';
+import { useAutoLogout } from '@/features/account/hooks/useAutoLogout';
+import { InteractionManager } from 'react-native';
+import { useEffect } from 'react';
 
 const queryClient = new QueryClient();
 
@@ -38,6 +41,16 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { user, isLoading, session } = useAuth();
+  const { resetTimer } = useAutoLogout();
+
+  useEffect(() => {
+    const subscription = InteractionManager.runAfterInteractions(() => {
+      resetTimer();
+    });
+    console.log('Setting up interaction listener for auto-logout');
+    return () => subscription.cancel();
+  }, [resetTimer]);
+
   if (isLoading) {
     return null;
   }

@@ -50,7 +50,7 @@ export const useLogout = () => {
 
       resetAllStores();
 
-      showAlert('Success', 'You have been logged out.');
+      showAlert('You have been logged out.');
     } catch (error: any) {
       setErrors({ general: error.message });
       showAlert('Error', error.message);
@@ -79,5 +79,6 @@ export const useLogout = () => {
     loading,
     errors,
     signOut,
+    performSignOut,
   };
 };
