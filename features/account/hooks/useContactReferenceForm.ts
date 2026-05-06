@@ -41,8 +41,8 @@ export const useContactReferenceForm = ({
   const { setContactInfo } = useContactReferenceStore();
 
   useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
+    if (initialData && initialData.length > 0) {
+      setFormData(normalizeReferences(initialData));
     }
   }, [initialData]);
 
