@@ -2,6 +2,19 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import RootLayout from '@/app/_layout';
 
+jest.mock('@/core/api/supabaseClient', () => ({
+  supabaseClient: {
+    auth: {
+      getUser: jest.fn(),
+      signOut: jest.fn(),
+    },
+    from: jest.fn(() => ({
+      select: jest.fn(),
+      insert: jest.fn(),
+    })),
+  },
+}));
+
 jest.mock('@/features/auth/hooks/useAuth', () => ({
   useAuth: () => ({ user: null, isLoading: false }),
 }));
