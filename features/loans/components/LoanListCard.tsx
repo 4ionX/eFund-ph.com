@@ -21,6 +21,9 @@ type Props = {
   status: LoanStatus;
   loanType: string;
   showAction: boolean;
+  provider: string;
+  accountNumber: string;
+  accountName: string;
 };
 
 const statusColors: Record<LoanStatus, string> = {
@@ -38,6 +41,9 @@ const LoanListCard = ({
   status,
   loanType,
   showAction,
+  provider,
+  accountNumber,
+  accountName,
 }: Props) => {
   const cardColor = useThemeColor({}, 'card');
   const safeNavigate = useNavigationLock();
@@ -80,8 +86,11 @@ const LoanListCard = ({
       <View style={styles.details}>
         <ThemedText type="description">Loan type: {loanType}</ThemedText>
 
-        {/* <ThemedText type="description">Provider: {provider}</ThemedText> */}
-
+        <ThemedText type="description">Provider: {provider}</ThemedText>
+        <ThemedText type="description">Account Name: {accountName}</ThemedText>
+        <ThemedText type="description">
+          Account Number: {accountNumber}
+        </ThemedText>
         <ThemedText type="description">Date: {formatDate(date)}</ThemedText>
       </View>
 

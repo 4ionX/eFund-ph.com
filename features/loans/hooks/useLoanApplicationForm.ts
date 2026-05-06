@@ -32,7 +32,7 @@ export const useLoanApplicationForm = () => {
 
   const [accountName, setAccountName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
-
+  const [confirmAccountNumber, setConfirmAccountNumber] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // ======================
@@ -92,6 +92,7 @@ export const useLoanApplicationForm = () => {
     setSelectedBank('');
     setAccountName('');
     setAccountNumber('');
+    setConfirmAccountNumber('');
     setErrors({});
   }, []);
 
@@ -125,14 +126,19 @@ export const useLoanApplicationForm = () => {
       setErrors({ provider: 'Please select provider' });
       return;
     }
-
+    if (accountNumber !== confirmAccountNumber) {
+      setErrors({
+        confirmAccountNumber: 'Account numbers do not match',
+      });
+      return;
+    }
     const payload = {
       loanType,
       loanAmount,
       disbursementMethod,
       provider,
       accountName,
-      accountNumber: accountNumber, // keep string (sa backend na mag validate)
+      accountNumber: accountNumber,
       status: 'Pending',
     };
 
@@ -159,10 +165,11 @@ export const useLoanApplicationForm = () => {
     selectedWallet,
     selectedBank,
     user,
+    accountNumber,
+    confirmAccountNumber,
     loanType,
     loanAmount,
     accountName,
-    accountNumber,
     mutation,
   ]);
 
@@ -175,6 +182,7 @@ export const useLoanApplicationForm = () => {
     selectedBank,
     accountName,
     accountNumber,
+    confirmAccountNumber,
     errors,
 
     // setters
@@ -185,6 +193,7 @@ export const useLoanApplicationForm = () => {
     setSelectedBank,
     setAccountName,
     setAccountNumber,
+    setConfirmAccountNumber,
 
     // actions
     handleSubmit,

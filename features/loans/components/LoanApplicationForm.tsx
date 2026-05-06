@@ -32,6 +32,9 @@ type LoanProps = {
   accountNumber: string;
   setAccountNumber: (value: string) => void;
 
+  confirmAccountNumber: string;
+  setConfirmAccountNumber: (value: string) => void;
+
   errors?: Record<string, string>;
   handleSubmit?: () => void;
 
@@ -53,6 +56,8 @@ const LoanApplicationForm = ({
   setAccountName,
   accountNumber,
   setAccountNumber,
+  setConfirmAccountNumber,
+  confirmAccountNumber,
   errors = {},
   handleSubmit,
   isLoading,
@@ -120,8 +125,16 @@ const LoanApplicationForm = ({
         </Field>
       )}
 
-      {/* ACCOUNT NUMBER */}
       <Field>
+        {/* ACCOUNT NAME */}
+        <ThemedTextInput
+          placeholder="Enter account name"
+          value={accountName}
+          onChangeText={setAccountName}
+          error={!!errors.accountName}
+          errorMessage={errors.accountName}
+        />
+        {/* ACCOUNT NUMBER */}
         <ThemedTextInput
           placeholder="Enter account number"
           value={accountNumber}
@@ -130,15 +143,14 @@ const LoanApplicationForm = ({
           error={!!errors.accountNumber}
           errorMessage={errors.accountNumber}
         />
-
-        {/* ACCOUNT NAME */}
-
+        {/* CONFIRM ACCOUNT NUMBER */}
         <ThemedTextInput
-          placeholder="Enter account name"
-          value={accountName}
-          onChangeText={setAccountName}
-          error={!!errors.accountName}
-          errorMessage={errors.accountName}
+          placeholder="Confirm account number"
+          value={confirmAccountNumber}
+          onChangeText={setConfirmAccountNumber}
+          keyboardType="number-pad"
+          error={!!errors.confirmAccountNumber}
+          errorMessage={errors.confirmAccountNumber}
         />
       </Field>
 

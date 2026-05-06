@@ -17,7 +17,6 @@ import { useCoBorrowerStore } from '@/store/coBorrower.store';
 import { useContactReferenceStore } from '@/store/contactReference.store';
 import { useDocumentInformationStore } from '@/store/documents.store';
 import { usePersonalInformationStore } from '@/store/personalInformation.store';
-import { showAlert } from '@/shared/utils/ShowAlert';
 
 const steps = [
   { path: 'personal-information', label: 'Personal Information' },

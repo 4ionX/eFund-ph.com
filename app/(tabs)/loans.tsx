@@ -67,6 +67,9 @@ const LoanHistoryScreen = () => {
               status={item.status}
               loanType={item.loanType}
               showAction={item.status === 'For Approval'}
+              provider={item.provider}
+              accountName={item.accountName}
+              accountNumber={item.accountNumber}
             />
           )}
           ListFooterComponent={() => <View style={{ height: 50 }} />}
