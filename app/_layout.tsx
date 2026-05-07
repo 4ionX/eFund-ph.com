@@ -54,7 +54,11 @@ function RootLayoutNav() {
       <QueryClientProvider client={queryClient}>
         <SafeAreaProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
-            <Pressable onPress={resetTimer}>
+            <Pressable
+              style={{ flex: 1 }}
+              onPress={resetTimer}
+              onTouchStart={resetTimer}
+            >
               <BottomSheetModalProvider>
                 <ToastProvider>
                   <AppContainer>
