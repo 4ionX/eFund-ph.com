@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { AppState } from 'react-native';
 import { useLogout } from './useLogout';
 
-const TIMEOUT = 5 * 1000; // 5 minutes (change to 5000 for testing)
+const TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
 export const useAutoLogout = () => {
   // ✅ FIX: correct RN timer type
