@@ -26,7 +26,7 @@ import { amountToWords } from '@/shared/utils/amountToWords';
 import { formatDate } from '@/shared/utils/formatDate';
 import { getDayOfWeek } from '@/shared/utils/getDayOfWeek';
 import EFImage from '@/shared/components/ui/EFImage';
-
+import * as Sharing from 'expo-sharing';
 import { useFetchLoanContract } from '@/features/loans/hooks/useFetchContract';
 import { useLoanContractForm } from '@/features/loans/hooks/useLoanContractForm';
 import { useFileUpload } from '@/features/loans/hooks/useFileUpload';
@@ -149,7 +149,18 @@ const LoanContractScreen = () => {
         return 'transparent';
     }
   };
+  const handleExport = async () => {
+    try {
+      const uri = await viewRef.current.capture();
 
+      await Sharing.shareAsync(uri, {
+        mimeType: 'image/jpeg',
+        dialogTitle: 'Share Loan Contract',
+      });
+    } catch (error) {
+      console.log('Export error:', error);
+    }
+  };
   const status = contractInfo?.status;
   const watermarkText = contractInfo?.status?.toUpperCase();
 
@@ -160,7 +171,9 @@ const LoanContractScreen = () => {
       <TabHeader
         title="Loan Contract"
         leftIconName="chevron-back-outline"
+        rightIconName="download-outline"
         onBackPress={() => router.back()}
+        onRightPress={handleExport}
       />
 
       <ScrollView scrollEnabled={scrollEnabled}>
