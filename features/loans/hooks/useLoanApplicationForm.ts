@@ -56,6 +56,21 @@ export const useLoanApplicationForm = () => {
     return (data?.length ?? 0) > 0;
   };
 
+  const checkForPending = async (userId: string) => {
+    const { data, error } = await supabaseClient
+      .from('loan_applications')
+      .select('id, status')
+      .eq('user_id', userId)
+      .eq('status', 'Pending')
+      .limit(1);
+
+    if (error) {
+      console.log('❌ Pending error:', error.message);
+      return false; // fail-safe: don't block user if API fails
+    }
+
+    return (data?.length ?? 0) > 0;
+  };
   // ======================
   // MUTATION
   // ======================
@@ -112,6 +127,15 @@ export const useLoanApplicationForm = () => {
     }
 
     const hasForRelease = await checkForReleaseLoan(user.id);
+    const hasPending = await checkForPending(user.id);
+
+    if (hasPending) {
+      showAlert(
+        'Blocked',
+        'You already have a pending loan application. Please wait for it to be processed.',
+      );
+      return;
+    }
 
     if (hasForRelease) {
       showAlert(
