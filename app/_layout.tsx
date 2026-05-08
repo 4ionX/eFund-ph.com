@@ -19,6 +19,7 @@ import AppContainer from '@/shared/components/ui/AppContainer';
 import { ToastProvider } from '@/shared/context/ToastProvider';
 import { useAutoLogout } from '@/features/account/hooks/useAutoLogout';
 import { Pressable } from 'react-native';
+import { useEffect } from 'react';
 const queryClient = new QueryClient();
 
 export const unstable_settings = {
@@ -39,6 +40,7 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { user, isLoading, session } = useAuth();
+
   const { resetTimer } = useAutoLogout();
 
   if (isLoading) {

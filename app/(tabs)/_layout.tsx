@@ -3,35 +3,82 @@ import { isLiquidGlassAvailable } from 'expo-glass-effect';
 import { Tabs } from 'expo-router';
 import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs';
 import { Platform, StyleSheet, View } from 'react-native';
+import { useEffect } from 'react';
 
 import { TabBarIcon } from '@/shared/components/ui/TabBarIcon';
+import { useAuthStore } from '@/store/auth.store';
+import { supabaseClient } from '@/core/api/supabaseClient';
+import { useLogout } from '@/features/account/hooks/useLogout';
+import { showAlert } from '@/shared/utils/ShowAlert';
 
 export default function TabLayout() {
   const isIOS = Platform.OS === 'ios';
 
+  const { user, setUser } = useAuthStore();
+  const { performSignOut } = useLogout();
+
+  // ==========================
+  // BAN CHECK (SAFE VERSION)
+  // ==========================
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const checkBan = async () => {
+      try {
+        // ✅ SAFE WAY: get session user (NOT admin API)
+        const { data, error } = await supabaseClient.auth.getUser();
+
+        if (error || !data?.user) {
+          console.log('AUTH ERROR:', error?.message);
+          return;
+        }
+
+        const currentUser = data.user;
+
+        const isBanned = !!currentUser?.app_metadata?.is_banned;
+
+        console.log('isBanned:', isBanned);
+
+        if (isBanned) {
+          console.log('🚨 USER BANNED → AUTO LOGOUT');
+
+          await performSignOut();
+          showAlert('Your account has been disabled.');
+          setUser(null);
+        } else {
+          setUser(currentUser);
+        }
+      } catch (err: any) {
+        console.log('FETCH USER ERROR:', err.message);
+      }
+    };
+
+    checkBan();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ==========================
+  // LIQUID GLASS NAV
+  // ==========================
   if (isLiquidGlassAvailable()) {
     return (
       <View style={{ flex: 1 }}>
         <NativeTabs>
-          {/* HOME */}
           <NativeTabs.Trigger name="index">
             <Icon sf="house" />
             <Label>Home</Label>
           </NativeTabs.Trigger>
 
-          {/* BILLS */}
           <NativeTabs.Trigger name="bills">
             <Icon sf="doc.text" />
             <Label>Bills</Label>
           </NativeTabs.Trigger>
 
-          {/* LOANS */}
           <NativeTabs.Trigger name="loans">
             <Icon sf="doc.text.magnifyingglass" />
             <Label>Loans</Label>
           </NativeTabs.Trigger>
 
-          {/* ACCOUNT */}
           <NativeTabs.Trigger name="account">
             <Icon sf="person" />
             <Label>Account</Label>
@@ -41,7 +88,9 @@ export default function TabLayout() {
     );
   }
 
-  // ✅ FALLBACK (same as yours - already correct)
+  // ==========================
+  // FALLBACK TABS
+  // ==========================
   return (
     <Tabs
       screenOptions={{
