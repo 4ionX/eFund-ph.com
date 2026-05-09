@@ -19,7 +19,7 @@ export const useFileUpload = () => {
   };
 
   const uploadSignatureFile = async (
-    uriOrBase64: string,
+    input: string,
     userId: string,
     loanContractId: string,
   ) => {
@@ -27,16 +27,24 @@ export const useFileUpload = () => {
 
     let base64: string;
 
-    // 🔥 WEB CASE (IMPORTANT FIX)
-    if (Platform.OS === 'web') {
-      // already base64 from toDataURL()
-      base64 = uriOrBase64;
-    } else {
-      const compressedUri = await compressImage(uriOrBase64);
+    const isDataUri = input.startsWith('data:image');
+    const isBase64 = !input.startsWith('file://');
 
-      base64 = await FileSystem.readAsStringAsync(compressedUri, {
-        encoding: 'base64',
-      });
+    if (Platform.OS === 'web') {
+      base64 = input.replace(/^data:image\/\w+;base64,/, '');
+    } else {
+      if (isDataUri) {
+        base64 = input.replace(/^data:image\/\w+;base64,/, '');
+      } else if (isBase64) {
+        base64 = input;
+      } else {
+        // ONLY if file uri
+        const compressedUri = await compressImage(input);
+
+        base64 = await FileSystem.readAsStringAsync(compressedUri, {
+          encoding: 'base64',
+        });
+      }
     }
 
     const fileBuffer = decode(base64);

@@ -113,12 +113,14 @@ const LoanContractScreen = () => {
         return;
       }
 
-      // 🔥 IMPORTANT FIX: remove base64 prefix
       const cleanBase64 = sig.replace(/^data:image\/\w+;base64,/, '');
 
-      setSignature(sig); // ok for preview
+      setSignature(sig);
       handleSubmit(cleanBase64, contractInfo?.id);
+      return;
     }
+
+    ref.current?.readSignature();
   };
 
   const fullName = [
@@ -277,7 +279,7 @@ const LoanContractScreen = () => {
                   >
                     {signatureUrl ? (
                       <EFImage
-                        source={{ uri: signatureUrl }} // ✅ IMPORTANT
+                        source={{ uri: signatureUrl }}
                         style={styles.signatureImage}
                         contentFit="contain"
                         transition={200}
@@ -430,6 +432,11 @@ const LoanContractScreen = () => {
                   autoClear={false}
                   onBegin={() => setScrollEnabled(false)}
                   onEnd={() => setScrollEnabled(true)}
+                  onOK={(sig) => {
+                    setSignature(sig);
+
+                    handleSubmit(sig, contractInfo?.id);
+                  }}
                 />
               </ThemedView>
             )}
