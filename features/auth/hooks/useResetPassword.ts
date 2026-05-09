@@ -3,7 +3,6 @@ import {
   type ResetPasswordSchema,
 } from '@/features/auth/validations/auth.validation';
 import { useState } from 'react';
-import { Alert } from 'react-native';
 import { updatePassword } from '../api/password.api';
 import { showAlert } from '@/shared/utils/ShowAlert';
 

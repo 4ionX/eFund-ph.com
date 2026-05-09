@@ -38,157 +38,154 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 50 : 0}
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={styles.page}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.card}>
-            {/* HEADER (CENTERED) */}
-            <View style={styles.header}>
-              <Image
-                source={ImagesPath.logo}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-
-              <ThemedText type="subtitle" style={styles.title}>
-                Welcome to eFund
-              </ThemedText>
-
-              <ThemedText type="description" style={styles.subtitle}>
-                Sign in to continue
-              </ThemedText>
-            </View>
-
-            {/* EMAIL */}
-            <ThemedTextInput
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              error={!!errors.email}
-              errorMessage={errors.email}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              leftIcon={<Ionicons name="mail" size={20} color="#888" />}
-              style={styles.input}
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.card}>
+          {/* HEADER */}
+          <View style={styles.header}>
+            <Image
+              source={ImagesPath.logo}
+              style={styles.logo}
+              resizeMode="contain"
             />
 
-            {/* PASSWORD */}
-            <ThemedTextInput
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              error={!!errors.password}
-              errorMessage={errors.password}
-              leftIcon={<Ionicons name="lock-closed" size={20} color="#888" />}
-              rightIcon={
-                <Ionicons
-                  name={showPassword ? 'eye' : 'eye-off'}
-                  size={20}
-                  color="#888"
-                />
-              }
-              onRightIconPress={() => setShowPassword(!showPassword)}
-              style={styles.input}
-            />
+            <ThemedText type="subtitle" style={styles.title}>
+              Welcome to eFund
+            </ThemedText>
 
-            {/* FORGOT */}
-            <TouchableOpacity
-              onPress={() => forgotPassword(email)}
-              style={styles.forgotContainer}
-            >
-              <ThemedText type="caption" style={styles.forgotText}>
-                Forgot Password?
-              </ThemedText>
-            </TouchableOpacity>
-
-            {/* LOGIN BUTTON */}
-            <AnimatedButton
-              label={loading ? 'Signing In...' : 'Sign In'}
-              onPress={() => handleLoginWithEmail(email, password)}
-            />
-
-            {/* SIGN UP */}
-            <View style={styles.signUpContainer}>
-              <ThemedText type="caption" style={styles.signUpText}>
-                Don&apos;t have an account?{' '}
-              </ThemedText>
-
-              <TouchableOpacity onPress={() => router.replace('/auth/sign-up')}>
-                <ThemedText type="caption" style={styles.signUpLink}>
-                  Sign Up
-                </ThemedText>
-              </TouchableOpacity>
-            </View>
-
-            {/* DIVIDER */}
-            <View style={styles.separatorContainer}>
-              <View style={styles.line} />
-              <ThemedText type="caption" style={styles.separatorText}>
-                Sign in with
-              </ThemedText>
-              <View style={styles.line} />
-            </View>
-
-            {/* GOOGLE */}
-            <TouchableOpacity
-              style={[
-                styles.googleButton,
-                { backgroundColor: googleBg, borderColor: googleBorder },
-              ]}
-              onPress={googleSignIn}
-            >
-              <Ionicons name="logo-google" size={20} color={googleText} />
-              <ThemedText style={[styles.googleText, { color: googleText }]}>
-                Continue with Google
-              </ThemedText>
-            </TouchableOpacity>
-
-            {/* TERMS */}
-            <ThemedText type="caption" style={styles.terms}>
-              By continuing, you agree to our Terms & Privacy Policy
+            <ThemedText type="description" style={styles.subtitle}>
+              Sign in to continue
             </ThemedText>
           </View>
-        </ScrollView>
-      </View>
+
+          {/* EMAIL */}
+          <ThemedTextInput
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            error={!!errors.email}
+            errorMessage={errors.email}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            leftIcon={<Ionicons name="mail" size={20} color="#888" />}
+            style={styles.input}
+          />
+
+          {/* PASSWORD */}
+          <ThemedTextInput
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            error={!!errors.password}
+            errorMessage={errors.password}
+            leftIcon={<Ionicons name="lock-closed" size={20} color="#888" />}
+            rightIcon={
+              <Ionicons
+                name={showPassword ? 'eye' : 'eye-off'}
+                size={20}
+                color="#888"
+              />
+            }
+            onRightIconPress={() => setShowPassword(!showPassword)}
+            style={styles.input}
+          />
+
+          {/* FORGOT */}
+          <TouchableOpacity
+            onPress={() => forgotPassword(email)}
+            style={styles.forgot}
+          >
+            <ThemedText type="caption" style={styles.forgotText}>
+              Forgot Password?
+            </ThemedText>
+          </TouchableOpacity>
+
+          {/* LOGIN */}
+          <AnimatedButton
+            label={loading ? 'Signing In...' : 'Sign In'}
+            onPress={() => handleLoginWithEmail(email, password)}
+          />
+
+          {/* SIGN UP */}
+          <View style={styles.signUp}>
+            <ThemedText type="caption" style={styles.signUpText}>
+              Don&apos;t have an account?{' '}
+            </ThemedText>
+
+            <TouchableOpacity onPress={() => router.replace('/auth/sign-up')}>
+              <ThemedText type="caption" style={styles.signUpLink}>
+                Sign Up
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+
+          {/* DIVIDER */}
+          <View style={styles.divider}>
+            <View style={styles.line} />
+            <ThemedText type="caption" style={styles.dividerText}>
+              Sign in with
+            </ThemedText>
+            <View style={styles.line} />
+          </View>
+
+          {/* GOOGLE */}
+          <TouchableOpacity
+            style={[
+              styles.googleBtn,
+              { backgroundColor: googleBg, borderColor: googleBorder },
+            ]}
+            onPress={googleSignIn}
+          >
+            <Ionicons name="logo-google" size={20} color={googleText} />
+            <ThemedText style={[styles.googleText, { color: googleText }]}>
+              Continue with Google
+            </ThemedText>
+          </TouchableOpacity>
+
+          {/* TERMS */}
+          <ThemedText type="caption" style={styles.terms}>
+            By continuing, you agree to our Terms & Privacy Policy
+          </ThemedText>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
+
 const styles = StyleSheet.create({
-  page: {
+  container: {
     flex: 1,
-    alignItems: 'center',
   },
 
-  scrollContent: {
+  scroll: {
     flexGrow: 1,
-    width: '100%',
-    maxWidth: 420,
-    alignSelf: 'center',
     justifyContent: 'center',
-    paddingVertical: Spacing['2xl'],
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xl,
   },
 
   card: {
     width: '100%',
-    padding: Spacing.md,
+    maxWidth: 420,
+    alignSelf: 'center',
   },
 
   header: {
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.lg,
   },
 
   logo: {
-    width: 150,
-    height: 150,
-    marginBottom: Spacing.xs,
+    width: 120,
+    height: 120,
+    marginBottom: Spacing.sm,
   },
 
   title: {
@@ -199,62 +196,57 @@ const styles = StyleSheet.create({
 
   subtitle: {
     fontSize: Typography.size.base,
-    fontFamily: Typography.fontFamily.regular,
     textAlign: 'center',
-    marginBottom: Spacing.sm,
+    opacity: 0.7,
+    marginTop: 4,
   },
 
   input: {
     width: '100%',
   },
 
-  forgotContainer: {
+  forgot: {
     alignSelf: 'flex-end',
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
   },
 
   forgotText: {
-    fontSize: Typography.size.sm,
-    fontFamily: Typography.fontFamily.medium,
     color: '#007AFF',
   },
 
-  signUpContainer: {
-    marginVertical: Spacing.sm,
+  signUp: {
     flexDirection: 'row',
     justifyContent: 'center',
+    marginTop: Spacing.md,
+    flexWrap: 'wrap',
   },
 
   signUpText: {
-    fontSize: Typography.size.sm,
     color: '#666',
   },
 
   signUpLink: {
-    fontSize: Typography.size.sm,
     color: '#007AFF',
   },
 
-  separatorContainer: {
+  divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '100%',
-    marginVertical: Spacing.sm,
+    marginVertical: Spacing.lg,
   },
 
   line: {
     flex: 1,
-    height: 1,
+    height: StyleSheet.hairlineWidth,
     backgroundColor: '#ccc',
   },
 
-  separatorText: {
+  dividerText: {
     marginHorizontal: Spacing.sm,
-    fontSize: Typography.size.sm,
     color: '#666',
   },
 
-  googleButton: {
+  googleBtn: {
     width: '100%',
     height: 52,
     borderRadius: Radius.full,
@@ -263,7 +255,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     borderWidth: 1,
-    marginBottom: Spacing.sm,
   },
 
   googleText: {
@@ -274,7 +265,6 @@ const styles = StyleSheet.create({
   terms: {
     textAlign: 'center',
     opacity: 0.6,
-    marginTop: Spacing.xs,
-    fontSize: Typography.size.sm,
+    marginTop: Spacing.lg,
   },
 });

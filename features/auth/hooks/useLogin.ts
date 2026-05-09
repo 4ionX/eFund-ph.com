@@ -1,7 +1,6 @@
 import { loginSchema } from '@/features/auth/validations/auth.validation';
 import { useAuthStore } from '@/store/auth.store';
 import { useState } from 'react';
-import { Alert } from 'react-native';
 import { sendPasswordResetEmail } from '../api/password.api';
 import { signInWithEmail } from '../api/signIn.api';
 import { signInWithGoogle } from '../api/google.api';

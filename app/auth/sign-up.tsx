@@ -38,162 +38,154 @@ export default function SignupScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 50 : 0}
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* PAGE WRAPPER (CENTER FIX FOR WEB) */}
-      <View style={styles.page}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.sheetContent}>
-            {/* Logo */}
-            <Image
-              source={ImagesPath.logo}
-              style={styles.logo}
-              resizeMode="contain"
-            />
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.card}>
+          {/* LOGO */}
+          <Image
+            source={ImagesPath.logo}
+            style={styles.logo}
+            resizeMode="contain"
+          />
 
-            {/* Title */}
-            <ThemedText type="subtitle" style={styles.title}>
-              Create Your Account
+          {/* TITLE */}
+          <ThemedText type="subtitle" style={styles.title}>
+            Create Your Account
+          </ThemedText>
+
+          <ThemedText type="description" style={styles.subtitle}>
+            Sign up to get started
+          </ThemedText>
+
+          {/* EMAIL */}
+          <ThemedTextInput
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            error={!!errors.email}
+            errorMessage={errors.email}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            leftIcon={<Ionicons name="mail" size={20} color="#888" />}
+            style={styles.input}
+          />
+
+          {/* PASSWORD */}
+          <ThemedTextInput
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            error={!!errors.password}
+            errorMessage={errors.password}
+            leftIcon={<Ionicons name="lock-closed" size={20} color="#888" />}
+            rightIcon={
+              <Ionicons
+                name={showPassword ? 'eye' : 'eye-off'}
+                size={20}
+                color="#888"
+              />
+            }
+            onRightIconPress={() => setShowPassword(!showPassword)}
+            style={styles.input}
+          />
+
+          {/* CONFIRM PASSWORD */}
+          <ThemedTextInput
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry={!showConfirmPassword}
+            error={!!errors.confirmPassword}
+            errorMessage={errors.confirmPassword}
+            leftIcon={<Ionicons name="lock-closed" size={20} color="#888" />}
+            rightIcon={
+              <Ionicons
+                name={showConfirmPassword ? 'eye' : 'eye-off'}
+                size={20}
+                color="#888"
+              />
+            }
+            onRightIconPress={() =>
+              setShowConfirmPassword(!showConfirmPassword)
+            }
+            style={styles.input}
+          />
+
+          {/* BUTTON */}
+          <AnimatedButton
+            label={loading ? 'Creating Account...' : 'Sign Up'}
+            onPress={handleSignup}
+          />
+
+          {/* LOGIN LINK */}
+          <TouchableOpacity
+            style={styles.backLogin}
+            onPress={() => router.replace('/auth/login')}
+          >
+            <ThemedText type="caption" style={styles.backLoginText}>
+              Back to Login
             </ThemedText>
-
-            {/* Subtitle */}
-            <ThemedText type="description" style={styles.subtitle}>
-              Sign up to get started
-            </ThemedText>
-
-            {/* Email */}
-            <ThemedTextInput
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              error={!!errors.email}
-              errorMessage={errors.email}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              leftIcon={<Ionicons name="mail" size={20} color="#888" />}
-              style={styles.input}
-            />
-
-            {/* Password */}
-            <ThemedTextInput
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              error={!!errors.password}
-              errorMessage={errors.password}
-              leftIcon={<Ionicons name="lock-closed" size={20} color="#888" />}
-              rightIcon={
-                <Ionicons
-                  name={showPassword ? 'eye' : 'eye-off'}
-                  size={20}
-                  color="#888"
-                />
-              }
-              onRightIconPress={() => setShowPassword(!showPassword)}
-              style={styles.input}
-            />
-
-            {/* Confirm Password */}
-            <ThemedTextInput
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry={!showConfirmPassword}
-              error={!!errors.confirmPassword}
-              errorMessage={errors.confirmPassword}
-              leftIcon={<Ionicons name="lock-closed" size={20} color="#888" />}
-              rightIcon={
-                <Ionicons
-                  name={showConfirmPassword ? 'eye' : 'eye-off'}
-                  size={20}
-                  color="#888"
-                />
-              }
-              onRightIconPress={() =>
-                setShowConfirmPassword(!showConfirmPassword)
-              }
-              style={styles.input}
-            />
-
-            {/* Button */}
-            <AnimatedButton
-              label={loading ? 'Creating Account...' : 'Sign Up'}
-              onPress={handleSignup}
-            />
-
-            {/* Back login */}
-            <TouchableOpacity
-              style={{ marginTop: Spacing.md }}
-              onPress={() => router.replace('/auth/login')}
-            >
-              <ThemedText
-                type="caption"
-                style={{
-                  color: '#007AFF',
-                  alignItems: 'center',
-                  alignSelf: 'center',
-                }}
-              >
-                Back to Login
-              </ThemedText>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </View>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-
-/* ================= STYLES ================= */
 const styles = StyleSheet.create({
-  page: {
+  container: {
     flex: 1,
-    alignItems: 'center',
   },
 
-  scrollContent: {
+  scroll: {
     flexGrow: 1,
-    width: '100%',
-    maxWidth: 480, // 🔥 same as login (mobile-like web)
-    paddingTop: Spacing['2xl'],
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xl,
   },
 
-  sheetContent: {
-    padding: Spacing.md,
+  card: {
     width: '100%',
+    maxWidth: 420,
     alignSelf: 'center',
-    alignItems: 'stretch', // 🔥 FIX INPUT FULL WIDTH
-    gap: Spacing.xs,
   },
 
   logo: {
-    width: 150,
-    height: 150,
-    marginBottom: Spacing.xs,
+    width: 120,
+    height: 120,
     alignSelf: 'center',
+    marginBottom: Spacing.sm,
   },
 
   title: {
-    marginBottom: 2,
     fontSize: Typography.size.xl,
     fontFamily: Typography.fontFamily.bold,
-    textAlign: 'center', // 🔥 CENTER FIX
+    textAlign: 'center',
   },
 
   subtitle: {
-    marginBottom: Spacing.sm,
     fontSize: Typography.size.base,
-    fontFamily: Typography.fontFamily.regular,
     textAlign: 'center',
+    opacity: 0.7,
+    marginBottom: Spacing.md,
   },
 
   input: {
     width: '100%',
+  },
+
+  backLogin: {
+    marginTop: Spacing.md,
+    alignSelf: 'center',
+  },
+
+  backLoginText: {
+    color: '#007AFF',
   },
 });
