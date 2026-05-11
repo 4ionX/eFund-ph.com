@@ -18,7 +18,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppContainer from '@/shared/components/ui/AppContainer';
 import { ToastProvider } from '@/shared/context/ToastProvider';
 import { useAutoLogout } from '@/features/account/hooks/useAutoLogout';
-import { Pressable } from 'react-native';
 
 const queryClient = new QueryClient();
 

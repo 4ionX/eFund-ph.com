@@ -1,10 +1,10 @@
-import { useThemeColor } from "@/shared/hooks/theme/useThemeColor";
+import { useThemeColor } from '@/shared/hooks/theme/useThemeColor';
 import {
   BottomSheetModal,
   BottomSheetScrollView,
   BottomSheetView,
-} from "@gorhom/bottom-sheet";
-import React, { useEffect, useMemo, useRef } from "react";
+} from '@gorhom/bottom-sheet';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   Dimensions,
   Platform,
@@ -12,7 +12,7 @@ import {
   StyleSheet,
   useColorScheme,
   View,
-} from "react-native";
+} from 'react-native';
 
 type Props = {
   visible: boolean;
@@ -20,7 +20,7 @@ type Props = {
   children: React.ReactNode;
   initialSnapHeight?: number | string;
   maxSnapHeight?: number | string;
-  type?: "default" | "scroll";
+  type?: 'default' | 'scroll';
   onClose?: () => void;
 };
 
@@ -28,22 +28,22 @@ export default function DynamicBottomSheet({
   visible,
   setVisible,
   children,
-  initialSnapHeight = "50%",
-  maxSnapHeight = "100%",
-  type = "default",
+  initialSnapHeight = '50%',
+  maxSnapHeight = '100%',
+  type = 'default',
   onClose,
 }: Props) {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
-  const windowHeight = Dimensions.get("window").height;
-  const backgroundColor = useThemeColor({}, "background");
+  const windowHeight = Dimensions.get('window').height;
+  const backgroundColor = useThemeColor({}, 'background');
   const colorScheme = useColorScheme();
 
   const snapPoints = useMemo(() => {
     const toNumber = (val: number | string) => {
-      if (typeof val === "string" && val.endsWith("%")) {
+      if (typeof val === 'string' && val.endsWith('%')) {
         return (parseFloat(val) / 100) * windowHeight;
       }
-      return typeof val === "string" ? parseFloat(val) : val;
+      return typeof val === 'string' ? parseFloat(val) : val;
     };
     const initial = toNumber(initialSnapHeight);
     const max = toNumber(maxSnapHeight);
@@ -64,7 +64,7 @@ export default function DynamicBottomSheet({
     borderTopRightRadius: 16,
     ...Platform.select({
       ios: {
-        shadowColor: "#000",
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: -3 },
         shadowOpacity: 0.1,
         shadowRadius: 6,
@@ -76,18 +76,18 @@ export default function DynamicBottomSheet({
   };
 
   const handleStyle = {
-    backgroundColor: colorScheme === "dark" ? "#888" : "#ccc",
+    backgroundColor: colorScheme === 'dark' ? '#888' : '#ccc',
   };
 
   return (
-    <View style={styles.overlay} pointerEvents={visible ? "auto" : "none"}>
+    <View style={styles.overlay} pointerEvents={visible ? 'auto' : 'none'}>
       {visible && (
         <Pressable
           style={[
             StyleSheet.absoluteFillObject,
             {
               backgroundColor:
-                colorScheme === "dark" ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.3)",
+                colorScheme === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.3)',
             },
           ]}
           onPress={() => {
@@ -108,7 +108,7 @@ export default function DynamicBottomSheet({
         backgroundStyle={sheetBackgroundStyle}
         handleIndicatorStyle={handleStyle}
       >
-        {type === "scroll" ? (
+        {type === 'scroll' ? (
           <BottomSheetScrollView
             style={styles.content}
             keyboardShouldPersistTaps="handled"
@@ -126,7 +126,7 @@ export default function DynamicBottomSheet({
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: "flex-end",
+    justifyContent: 'flex-end',
   },
   content: {
     padding: 16,

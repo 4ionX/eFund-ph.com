@@ -1,14 +1,16 @@
-import * as Haptics from "expo-haptics";
-import { Platform, Pressable, StyleSheet, ViewProps } from "react-native";
+import * as Haptics from 'expo-haptics';
+import type { ViewProps } from 'react-native';
+// eslint-disable-next-line no-duplicate-imports
+import { Platform, Pressable, StyleSheet } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-} from "react-native-reanimated";
+} from 'react-native-reanimated';
 
-import { Radius, Spacing } from "@/shared/constants/theme";
-import { useThemeColor } from "@/shared/hooks/theme/useThemeColor";
-import { ThemedText } from "../theme/ThemedText";
+import { Radius, Spacing } from '@/shared/constants/theme';
+import { useThemeColor } from '@/shared/hooks/theme/useThemeColor';
+import { ThemedText } from '../theme/ThemedText';
 
 type AnimatedCardProps = ViewProps & {
   title?: string;
@@ -27,7 +29,7 @@ export default function AnimatedCard({
   style,
   ...rest
 }: AnimatedCardProps) {
-  const cardColor = useThemeColor({}, "card");
+  const cardColor = useThemeColor({}, 'card');
 
   const scale = useSharedValue(1);
 
@@ -37,7 +39,7 @@ export default function AnimatedCard({
 
   const handlePressIn = () => {
     scale.value = withSpring(0.96);
-    if (Platform.OS === "ios") {
+    if (Platform.OS === 'ios') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
   };
@@ -76,15 +78,15 @@ export default function AnimatedCard({
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
+    width: '100%',
     padding: Spacing.md,
   },
   card: {
-    width: "100%",
+    width: '100%',
     padding: Spacing.md,
     borderRadius: Radius.md,
 
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 12,

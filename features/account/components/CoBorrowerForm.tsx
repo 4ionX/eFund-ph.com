@@ -87,12 +87,20 @@ const CoBorrowerForm = ({ initialData }: Props) => {
         />
       ) : (
         <>
-          <ThemedTextInput
-            value={formData.birthDate ?? ''}
-            editable={false}
-            onPressIn={() => setShowDatePicker(true)}
-            error={!!errors.birthDate}
-          />
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <View pointerEvents="none">
+              <ThemedTextInput
+                value={formData.birthDate ?? ''}
+                editable={false}
+                placeholder="Select birth date"
+                error={!!errors.birthDate}
+                errorMessage={errors.birthDate}
+              />
+            </View>
+          </TouchableOpacity>
 
           {showDatePicker && (
             <DateTimePicker
@@ -104,8 +112,11 @@ const CoBorrowerForm = ({ initialData }: Props) => {
               maximumDate={new Date()}
               minimumDate={new Date(1990, 0, 1)}
               onChange={(event, selectedDate) => {
-                setShowDatePicker(false);
-                if (selectedDate) {
+                if (Platform.OS === 'android') {
+                  setShowDatePicker(false);
+                }
+
+                if (event.type === 'set' && selectedDate) {
                   handleChange(
                     'birthDate',
                     selectedDate.toISOString().split('T')[0],

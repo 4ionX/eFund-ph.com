@@ -1,7 +1,13 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import React from 'react';
-import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 
 import type { PersonalInformation } from '@/features/account/types/personal-information';
 import { ThemedText } from '@/shared/components/theme/ThemedText';
@@ -84,12 +90,17 @@ const PersonalInformationForm = ({ initialData }: Props) => {
           />
         ) : (
           <>
-            <ThemedTextInput
-              value={formData.birthDate ?? ''}
-              editable={false}
-              onPressIn={() => setShowDatePicker(true)}
-              error={!!errors.birthDate}
-            />
+            <Pressable onPress={() => setShowDatePicker(true)}>
+              <View pointerEvents="none">
+                <ThemedTextInput
+                  value={formData.birthDate ?? ''}
+                  editable={false}
+                  error={!!errors.birthDate}
+                  errorMessage={errors.birthDate}
+                  placeholder="Select birth date"
+                />
+              </View>
+            </Pressable>
 
             {showDatePicker && (
               <DateTimePicker
