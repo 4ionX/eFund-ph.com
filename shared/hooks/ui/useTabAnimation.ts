@@ -1,5 +1,10 @@
 import { useEffect } from 'react';
-import { useSharedValue, withTiming, useAnimatedStyle, Easing } from 'react-native-reanimated';
+import {
+  useSharedValue,
+  withTiming,
+  useAnimatedStyle,
+  Easing,
+} from 'react-native-reanimated';
 
 type TabProps = {
   focused: boolean;
@@ -20,7 +25,7 @@ const useTabAnimation = ({ focused }: TabProps) => {
             duration: 300,
             easing: Easing.inOut(Easing.ease),
           });
-        }
+        },
       );
     } else {
       // Ensure it's at scale 1 when not focused

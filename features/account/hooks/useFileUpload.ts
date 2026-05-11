@@ -21,49 +21,51 @@ export const useFileUpload = () => {
   };
 
   // 🔥 SAFE FOR WEB + MOBILE
-  const uriToBlob = async (uri: string) => {
-    // ✅ WEB (Safari / Chrome)
-    if (typeof window !== 'undefined') {
-      const res = await fetch(uri);
-      const blob = await res.blob();
+  // const uriToBlob = async (uri: string) => {
+  //   // ✅ WEB (Safari / Chrome)
+  //   if (typeof window !== 'undefined') {
+  //     const res = await fetch(uri);
+  //     const blob = await res.blob();
 
-      if (!blob || blob.size === 0) {
-        throw new Error('Web upload failed: empty blob');
-      }
+  //     if (!blob || blob.size === 0) {
+  //       throw new Error('Web upload failed: empty blob');
+  //     }
 
-      return blob;
-    }
+  //     return blob;
+  //   }
 
-    // ✅ MOBILE (Expo)
-    const res = await fetch(uri);
-    return await res.blob();
-  };
+  //   // ✅ MOBILE (Expo)
+  //   const res = await fetch(uri);
+  //   return await res.blob();
+  // };
 
   const uploadFile = async (uri: string, path: string) => {
     const compressedUri = await compressImage(uri);
-    const blob = await uriToBlob(compressedUri);
+
+    const response = await fetch(compressedUri);
+    const arrayBuffer = await response.arrayBuffer();
 
     const { error } = await supabaseClient.storage
-      .from('documents') // ✅ FIXED BUCKET
-      .upload(path, blob, {
+      .from('documents')
+      .upload(path, arrayBuffer, {
         contentType: 'image/jpeg',
         upsert: true,
       });
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.log('SUPABASE UPLOAD ERROR:', error);
+      throw new Error(error.message);
+    }
 
     return path;
   };
 
-  // =========================
-  // ID / BUSINESS UPLOAD
-  // =========================
   const uploadDocumentImage = async (
     uri: string,
     userId: string,
     folder: 'id' | 'business',
   ) => {
-    const path = `${folder}/${userId}.jpg`; // ✅ folder structure
+    const path = `${folder}/${userId}.jpg`;
     return uploadFile(uri, path);
   };
 

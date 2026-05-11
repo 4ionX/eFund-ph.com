@@ -6,6 +6,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -16,6 +17,7 @@ import { ThemedView } from '@/shared/components/theme/ThemedView';
 import AnimatedButton from '@/shared/components/ui/AnimatedButton';
 import { Spacing } from '@/shared/constants/theme';
 import { usePersonalInformationForm } from '../hooks/usePersonalInformationForm';
+import { Ionicons } from '@expo/vector-icons';
 
 type Props = {
   initialData?: PersonalInformation;
@@ -33,7 +35,8 @@ const PersonalInformationForm = ({ initialData }: Props) => {
     isLocked,
   } = usePersonalInformationForm({ initialData: initialData });
   const today = new Date().toISOString().split('T')[0];
-
+  const [civilStatusOpen, setCivilStatusOpen] = React.useState(false);
+  const CIVIL_STATUS = ['Single', 'Married', 'Widowed', 'Separated'];
   return (
     <ThemedView style={styles.container}>
       <ScrollView
@@ -110,7 +113,7 @@ const PersonalInformationForm = ({ initialData }: Props) => {
                 mode="date"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 maximumDate={new Date()}
-                minimumDate={new Date(1990, 0, 1)}
+                minimumDate={new Date(1960, 0, 1)}
                 onChange={(event, selectedDate) => {
                   setShowDatePicker(false);
                   if (selectedDate) {
@@ -127,45 +130,45 @@ const PersonalInformationForm = ({ initialData }: Props) => {
 
         {/* Civil Status */}
         <ThemedText type="defaultSemiBold">Civil Status</ThemedText>
-        {Platform.OS === 'web' ? (
-          <select
-            value={formData.civilStatus}
-            onChange={(e) => handleChange('civilStatus', e.target.value)}
-            style={{
-              padding: 12,
-              borderRadius: 6,
-              border: errors.civilStatus ? '1px solid red' : '1px solid #ccc',
-              width: '100%',
-              height: 40,
-              marginBottom: 10,
-            }}
-          >
-            <option value="Single">Single</option>
-            <option value="Married">Married</option>
-            <option value="Widowed">Widowed</option>
-            <option value="Separated">Separated</option>
-          </select>
-        ) : (
-          <View
-            style={[
-              styles.pickerContainer,
-              { borderColor: errors.civilStatus ? 'red' : '#ccc' },
-            ]}
-          >
-            <Picker
-              selectedValue={formData.civilStatus}
-              onValueChange={(val) => handleChange('civilStatus', val)}
-              enabled={!isLocked}
-            >
-              <Picker.Item label="Single" value="Single" />
-              <Picker.Item label="Married" value="Married" />
-              <Picker.Item label="Widowed" value="Widowed" />
-              <Picker.Item label="Separated" value="Separated" />
-            </Picker>
+
+        <TouchableOpacity
+          disabled={isLocked}
+          onPress={() => setCivilStatusOpen((prev) => !prev)}
+          style={[
+            styles.dropdown,
+            { borderColor: errors.civilStatus ? 'red' : '#E5E7EB' },
+          ]}
+        >
+          <ThemedText>
+            {formData.civilStatus || 'Select civil status'}
+          </ThemedText>
+
+          <Ionicons
+            name={civilStatusOpen ? 'chevron-up' : 'chevron-down'}
+            size={20}
+            color="#666"
+          />
+        </TouchableOpacity>
+
+        {civilStatusOpen && (
+          <View style={styles.dropdownList}>
+            {CIVIL_STATUS.map((item) => (
+              <TouchableOpacity
+                key={item}
+                onPress={() => {
+                  handleChange('civilStatus', item);
+                  setCivilStatusOpen(false);
+                }}
+                style={styles.dropdownItem}
+              >
+                <ThemedText>{item}</ThemedText>
+              </TouchableOpacity>
+            ))}
           </View>
         )}
+
         {errors.civilStatus && (
-          <ThemedText type="default" style={{ color: 'red' }}>
+          <ThemedText style={{ color: 'red', marginTop: 4 }}>
             {errors.civilStatus}
           </ThemedText>
         )}
@@ -261,7 +264,31 @@ export default PersonalInformationForm;
 
 const styles = StyleSheet.create({
   container: { padding: Spacing.md, flex: 1 },
+  dropdown: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 14,
+    borderWidth: 1,
+    borderRadius: 8,
+    marginTop: 8,
+    backgroundColor: '#fff',
+  },
 
+  dropdownList: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    marginTop: 6,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+  },
+
+  dropdownItem: {
+    padding: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F1F1',
+  },
   pickerContainer: {
     borderWidth: 1,
     borderRadius: 6,

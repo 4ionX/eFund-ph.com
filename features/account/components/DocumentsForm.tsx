@@ -1,29 +1,49 @@
-import { Picker } from '@react-native-picker/picker';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+import EFImage from '@/shared/components/ui/EFImage';
+import AnimatedButton from '@/shared/components/ui/AnimatedButton';
 
 import { ThemedText } from '@/shared/components/theme/ThemedText';
 import { ThemedView } from '@/shared/components/theme/ThemedView';
-import AnimatedButton from '@/shared/components/ui/AnimatedButton';
 
 import { Spacing } from '@/shared/constants/theme';
-import EFImage from '@/shared/components/ui/EFImage';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useDocumentsForm } from '../hooks/useDocumentsForm';
 import { useFileUpload } from '../hooks/useFileUpload';
+
 import type {
   BusinessDocumentType,
   PhilippineIDType,
 } from '../types/documents';
 
 const DocumentsForm = ({ initialData }: any) => {
-  const { formData, isLoading, handleChange, handleSave, pickImage, isLocked } =
-    useDocumentsForm({ initialData });
+  const {
+    isSubmitting,
+    formData,
+    isLoading,
+    handleChange,
+    handleSave,
+    pickImage,
+    isLocked,
+  } = useDocumentsForm({ initialData });
 
   const { getSignedUrl } = useFileUpload();
 
   const [idImageUrl, setIdImageUrl] = useState<string | null>(null);
   const [businessImageUrl, setBusinessImageUrl] = useState<string | null>(null);
+
+  const [showIdDropdown, setShowIdDropdown] = useState(false);
+  const [showBusinessDropdown, setShowBusinessDropdown] = useState(false);
 
   const isLocalFile = (value?: string | null) =>
     !!value &&
@@ -45,13 +65,17 @@ const DocumentsForm = ({ initialData }: any) => {
         }
 
         const url = await getSignedUrl(formData.idUrl);
-        if (alive) setIdImageUrl(url);
+
+        if (alive) {
+          setIdImageUrl(url);
+        }
       } catch (err) {
         console.log('ID error:', err);
       }
     };
 
     load();
+
     return () => {
       alive = false;
     };
@@ -62,7 +86,9 @@ const DocumentsForm = ({ initialData }: any) => {
     let alive = true;
 
     const load = async () => {
-      if (!formData.businessDocumentUrl) return setBusinessImageUrl(null);
+      if (!formData.businessDocumentUrl) {
+        return setBusinessImageUrl(null);
+      }
 
       try {
         if (isLocalFile(formData.businessDocumentUrl)) {
@@ -71,13 +97,17 @@ const DocumentsForm = ({ initialData }: any) => {
         }
 
         const url = await getSignedUrl(formData.businessDocumentUrl);
-        if (alive) setBusinessImageUrl(url);
+
+        if (alive) {
+          setBusinessImageUrl(url);
+        }
       } catch (err) {
         console.log('Business error:', err);
       }
     };
 
     load();
+
     return () => {
       alive = false;
     };
@@ -126,25 +156,31 @@ const DocumentsForm = ({ initialData }: any) => {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView keyboardShouldPersistTaps="handled">
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {/* ================= ID TYPE ================= */}
-        <ThemedText type="defaultSemiBold">ID Type </ThemedText>
 
-        <View style={styles.pickerContainer}>
-          <Picker
-            enabled={!isLocked}
-            selectedValue={formData.idType}
-            onValueChange={(v) => handleChange('idType', v)}
-            style={styles.picker}
-          >
-            {PHILIPPINE_ID_TYPES.map((item) => (
-              <Picker.Item key={item} label={item} value={item} />
-            ))}
-          </Picker>
-        </View>
+        <ThemedText type="defaultSemiBold" style={styles.label}>
+          ID Type
+        </ThemedText>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          disabled={isLocked}
+          onPress={() => setShowIdDropdown(true)}
+          style={styles.dropdown}
+        >
+          <ThemedText numberOfLines={1}>{formData.idType}</ThemedText>
+
+          <Ionicons name="chevron-down" size={20} color="#6B7280" />
+        </TouchableOpacity>
 
         {/* ================= ID UPLOAD ================= */}
+
         <TouchableOpacity
+          activeOpacity={0.8}
           onPress={() => pickImage('idUrl')}
           disabled={isLocked}
           style={styles.upload}
@@ -153,34 +189,42 @@ const DocumentsForm = ({ initialData }: any) => {
             <EFImage
               source={idImageUrl}
               style={styles.image}
-              contentFit="contain"
+              contentFit="cover"
             />
           ) : (
             <View style={styles.placeholder}>
-              <Ionicons name="cloud-upload-outline" size={40} color="#888" />
-              <ThemedText>Tap to upload ID</ThemedText>
+              <Ionicons name="cloud-upload-outline" size={42} color="#9CA3AF" />
+
+              <ThemedText type="defaultSemiBold">Upload Valid ID</ThemedText>
+
+              <ThemedText type="description">JPG, PNG supported</ThemedText>
             </View>
           )}
         </TouchableOpacity>
 
         {/* ================= BUSINESS TYPE ================= */}
-        <ThemedText type="defaultSemiBold">Business Document Type</ThemedText>
 
-        <View style={styles.pickerContainer}>
-          <Picker
-            enabled={!isLocked}
-            selectedValue={formData.businessDocumentType}
-            onValueChange={(v) => handleChange('businessDocumentType', v)}
-            style={styles.picker}
-          >
-            {BUSINESS_DOCUMENT_TYPES.map((item) => (
-              <Picker.Item key={item} label={item} value={item} />
-            ))}
-          </Picker>
-        </View>
+        <ThemedText type="defaultSemiBold" style={styles.label}>
+          Business Document Type
+        </ThemedText>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          disabled={isLocked}
+          onPress={() => setShowBusinessDropdown(true)}
+          style={styles.dropdown}
+        >
+          <ThemedText numberOfLines={1}>
+            {formData.businessDocumentType}
+          </ThemedText>
+
+          <Ionicons name="chevron-down" size={20} color="#6B7280" />
+        </TouchableOpacity>
 
         {/* ================= BUSINESS UPLOAD ================= */}
+
         <TouchableOpacity
+          activeOpacity={0.8}
           onPress={() => pickImage('businessDocumentUrl')}
           disabled={isLocked}
           style={styles.upload}
@@ -189,81 +233,182 @@ const DocumentsForm = ({ initialData }: any) => {
             <EFImage
               source={businessImageUrl}
               style={styles.image}
-              contentFit="contain"
+              contentFit="cover"
             />
           ) : (
             <View style={styles.placeholder}>
-              <Ionicons name="cloud-upload-outline" size={40} color="#888" />
-              <ThemedText>Tap to upload document</ThemedText>
+              <Ionicons name="document-outline" size={42} color="#9CA3AF" />
+
+              <ThemedText type="defaultSemiBold">
+                Upload Business Document
+              </ThemedText>
+
+              <ThemedText type="description">
+                Optional if none selected
+              </ThemedText>
             </View>
           )}
         </TouchableOpacity>
 
         {/* ================= SAVE ================= */}
+
         {!initialData && (
           <View style={styles.footer}>
             <AnimatedButton
-              label={isLoading ? 'Saving...' : 'Save'}
+              label={isLoading || isSubmitting ? 'Saving...' : 'Save'}
               onPress={handleSave}
               disabled={isLoading}
             />
           </View>
         )}
       </ScrollView>
+
+      {/* ================= ID MODAL ================= */}
+
+      <Modal visible={showIdDropdown} transparent animationType="fade">
+        <Pressable
+          style={styles.overlay}
+          onPress={() => setShowIdDropdown(false)}
+        >
+          <View style={styles.modal}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {PHILIPPINE_ID_TYPES.map((item) => (
+                <TouchableOpacity
+                  key={item}
+                  style={styles.option}
+                  onPress={() => {
+                    handleChange('idType', item);
+                    setShowIdDropdown(false);
+                  }}
+                >
+                  <ThemedText>{item}</ThemedText>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* ================= BUSINESS MODAL ================= */}
+
+      <Modal visible={showBusinessDropdown} transparent animationType="fade">
+        <Pressable
+          style={styles.overlay}
+          onPress={() => setShowBusinessDropdown(false)}
+        >
+          <View style={styles.modal}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {BUSINESS_DOCUMENT_TYPES.map((item) => (
+                <TouchableOpacity
+                  key={item}
+                  style={styles.option}
+                  onPress={() => {
+                    handleChange('businessDocumentType', item);
+                    setShowBusinessDropdown(false);
+                  }}
+                >
+                  <ThemedText>{item}</ThemedText>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </Pressable>
+      </Modal>
     </ThemedView>
   );
 };
 
 export default DocumentsForm;
 
-/* ================= STYLES ================= */
 const styles = StyleSheet.create({
-  container: { padding: Spacing.md, flex: 1 },
+  container: {
+    flex: 1,
+    padding: Spacing.md,
+  },
+
+  label: {
+    marginBottom: 8,
+  },
+
+  dropdown: {
+    height: 56,
+
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+
+    borderRadius: 16,
+
+    paddingHorizontal: 16,
+
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+
+    marginBottom: 20,
+
+    backgroundColor: '#FFFFFF',
+  },
 
   upload: {
-    height: 200,
-    borderRadius: 10,
+    height: 220,
+
+    borderRadius: 20,
+
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#E5E7EB',
+
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+
+    overflow: 'hidden',
+
+    marginBottom: 24,
+
+    backgroundColor: '#FFFFFF',
   },
 
   image: {
     width: '100%',
     height: '100%',
-    borderRadius: 10,
   },
 
   placeholder: {
     alignItems: 'center',
-  },
-
-  /* 🔥 CLEAN PICKER WRAPPER */
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 6,
-    overflow: 'hidden',
-    marginTop: 8,
-    marginBottom: 20,
-
-    height: 48,
     justifyContent: 'center',
-    backgroundColor: 'transparent',
+    gap: 10,
+    paddingHorizontal: 20,
   },
 
-  /* 🔥 removes inner thick border / underline */
-  picker: {
-    height: 48,
-    width: '100%',
-    borderWidth: 0,
-    elevation: 0,
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+
+  modal: {
+    maxHeight: Platform.OS === 'ios' ? '70%' : '75%',
+
+    backgroundColor: '#FFFFFF',
+
+    borderRadius: 24,
+
+    paddingVertical: 12,
+
+    overflow: 'hidden',
+  },
+
+  option: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
   },
 
   footer: {
-    marginTop: Spacing.lg,
-    marginBottom: Spacing.lg,
+    marginTop: 8,
+    marginBottom: 40,
   },
 });

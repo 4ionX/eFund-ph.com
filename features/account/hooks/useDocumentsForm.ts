@@ -39,7 +39,7 @@ export const useDocumentsForm = ({
   }, [initialData]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   // =========================
   // DISABLE BUSINESS
   // =========================
@@ -69,7 +69,7 @@ export const useDocumentsForm = ({
         businessDocumentType: 'None',
         businessDocumentUrl: null,
       });
-
+      setIsSubmitting(false);
       setErrors({});
     },
     onError: () => {
@@ -82,7 +82,7 @@ export const useDocumentsForm = ({
   // =========================
   const handleSave = useCallback(async () => {
     const result = DocumentsSchema.safeParse(formData);
-
+    setIsSubmitting(true);
     if (isLocked) return;
 
     if (!result.success) {
@@ -145,6 +145,7 @@ export const useDocumentsForm = ({
     } catch (err: any) {
       Alert.alert('Upload Error', err.message);
     }
+    setIsSubmitting(false);
   }, [formData, isLocked, mutation, uploadBatchDocuments, user]);
 
   // =========================
@@ -214,5 +215,6 @@ export const useDocumentsForm = ({
     isLoading: mutation.isPending,
     isLocked,
     isBusinessDisabled,
+    isSubmitting,
   };
 };
