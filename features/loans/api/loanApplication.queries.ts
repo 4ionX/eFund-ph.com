@@ -61,7 +61,8 @@ export const GET_LOAN_CONTRACT = gql`
           id
           interest
           processing_fee
-          notarial_fee
+          notes
+          others
           approved_amount
           service_fee
           total_deduction

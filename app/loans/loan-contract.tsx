@@ -248,13 +248,18 @@ const LoanContractScreen = () => {
                   label="Processing Fee"
                   value={formatCurrency(contractInfo?.processingFee)}
                 />
+
                 <Row
-                  label="Notarial Fee"
-                  value={formatCurrency(contractInfo?.notarialFee)}
+                  label="Collection Fee"
+                  value={formatCurrency(contractInfo?.serviceFee)}
                 />
                 <Row
-                  label="Others"
-                  value={formatCurrency(contractInfo?.serviceFee)}
+                  label={
+                    contractInfo?.notes
+                      ? `Others (${contractInfo.notes})`
+                      : 'Others'
+                  }
+                  value={formatCurrency(contractInfo?.others)}
                 />
                 <Row
                   label="Total Deductions"
