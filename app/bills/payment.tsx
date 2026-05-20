@@ -223,7 +223,9 @@ export default function PaymentScreen() {
         userId,
         selectedSchedule.id,
         payMode,
-        payMode === 'Penalty Payment' ? 'Paying penalty' : 'Paying installment',
+        payMode === 'Penalty Payment'
+          ? 'ONLINE PAYMENT(PENALTY)'
+          : 'ONLINE PAYMENT',
       );
     }, 200);
   };
