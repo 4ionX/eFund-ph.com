@@ -1,6 +1,6 @@
-import { Colors } from "@/shared/constants/theme";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
-import { ThemedText } from "../theme/ThemedText";
+import { Colors } from '@/shared/constants/theme';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ThemedText } from '../theme/ThemedText';
 
 const LoadingOverlay = () => {
   return (
@@ -17,18 +17,18 @@ export default LoadingOverlay;
 
 const styles = StyleSheet.create({
   overlay: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     top: 0,
     zIndex: 50,
-    backgroundColor: "rgba(124, 120, 120, 0.5)",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: 'rgba(124, 120, 120, 0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   text: {
-    textAlign: "center",
+    textAlign: 'center',
     marginTop: 8,
   },
 });

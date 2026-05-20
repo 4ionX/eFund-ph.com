@@ -1,5 +1,6 @@
 import { supabaseClient } from '@/core/api/supabaseClient';
 import * as ImageManipulator from 'expo-image-manipulator';
+import { Platform } from 'react-native';
 
 export type UploadItem = {
   uri: string;
@@ -40,20 +41,54 @@ export const useFileUpload = () => {
   // };
 
   const uploadFile = async (uri: string, path: string) => {
-    const compressedUri = await compressImage(uri);
+    let finalUri = uri;
 
-    const response = await fetch(compressedUri);
+    // ✅ compress only on mobile
+    if (Platform.OS !== 'web') {
+      finalUri = await compressImage(uri);
+    }
+
+    const response = await fetch(finalUri);
+
+    // =========================
+    // WEB
+    // =========================
+    if (Platform.OS === 'web') {
+      const blob = await response.blob();
+
+      const { data, error } = await supabaseClient.storage
+        .from('documents')
+        .upload(path, blob, {
+          contentType: blob.type || 'image/jpeg',
+          upsert: true,
+        });
+
+      console.log('WEB UPLOAD:', data);
+
+      if (error) {
+        console.log('WEB ERROR:', error);
+        throw new Error(error.message);
+      }
+
+      return path;
+    }
+
+    // =========================
+    // MOBILE
+    // =========================
     const arrayBuffer = await response.arrayBuffer();
 
-    const { error } = await supabaseClient.storage
+    const { data, error } = await supabaseClient.storage
       .from('documents')
       .upload(path, arrayBuffer, {
         contentType: 'image/jpeg',
         upsert: true,
       });
 
+    console.log('MOBILE UPLOAD:', data);
+
     if (error) {
-      console.log('SUPABASE UPLOAD ERROR:', error);
+      console.log('MOBILE ERROR:', error);
       throw new Error(error.message);
     }
 

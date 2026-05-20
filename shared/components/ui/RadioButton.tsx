@@ -1,12 +1,12 @@
-import { Colors, Spacing, Typography } from "@/shared/constants/theme";
-import React from "react";
+import { Colors, Spacing, Typography } from '@/shared/constants/theme';
+import React from 'react';
 import {
   StyleSheet,
   Text,
   TouchableOpacity,
   useColorScheme,
   View,
-} from "react-native";
+} from 'react-native';
 
 type RadioButtonProps = {
   options: string[];
@@ -19,11 +19,11 @@ const RadioButton: React.FC<RadioButtonProps> = ({
   selected,
   onSelect,
 }) => {
-  const colorScheme = useColorScheme() ?? "light";
+  const colorScheme = useColorScheme() ?? 'light';
   const textColor =
-    colorScheme === "dark" ? Colors.dark.text : Colors.light.text;
+    colorScheme === 'dark' ? Colors.dark.text : Colors.light.text;
   const borderColor =
-    colorScheme === "dark" ? Colors.dark.tint : Colors.light.tint;
+    colorScheme === 'dark' ? Colors.dark.tint : Colors.light.tint;
   const fillColor = Colors.brand.primary;
 
   return (
@@ -53,12 +53,12 @@ export default RadioButton;
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   radioContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginRight: Spacing.md,
     marginBottom: Spacing.sm,
   },
@@ -67,8 +67,8 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: Spacing.xs,
   },
   radioInner: {
