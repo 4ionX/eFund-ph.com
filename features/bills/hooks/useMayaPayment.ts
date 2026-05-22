@@ -1,5 +1,5 @@
 import { createClient, FunctionsHttpError } from '@supabase/supabase-js';
-import { Platform } from 'react-native';
+import { Platform, Linking } from 'react-native';
 import { useState } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 
@@ -52,20 +52,25 @@ export const useMayaPayment = () => {
 
       setCheckoutUrl(data.checkout_url);
 
-      // 🔥 SAFARI SAFE FIX
+      // =========================
+      // WEB
+      // =========================
       if (Platform.OS === 'web') {
         window.location.href = data.checkout_url;
         return;
       }
 
-      // 🔥 IMPORTANT: use AUTH SESSION (fixes Safari/iOS issues)
-      const result = await WebBrowser.openAuthSessionAsync(
-        data.checkout_url,
-        'https://auth.expo.io', // fallback redirect
-      );
+      // =========================
+      // MOBILE
+      // =========================
 
-      console.log('Browser result:', result);
+      // OPTION 1 (BEST)
+      await WebBrowser.openBrowserAsync(data.checkout_url);
+
+      // OPTION 2 (fallback)
+      // await Linking.openURL(data.checkout_url);
     } catch (err: any) {
+      console.log(err);
       setError(err.message);
     } finally {
       setLoading(false);
