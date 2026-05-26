@@ -98,8 +98,6 @@ export default function PaymentScreen() {
 
   const { data, isLoading, refetch } = useFetchLoanTransactions(
     loanAccountId as string,
-    50,
-    0,
   );
 
   useEffect(() => {

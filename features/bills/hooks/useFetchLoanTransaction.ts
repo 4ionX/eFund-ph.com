@@ -1,20 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchLoanTransactions } from '../api/loanAccount.api';
 
-export const useFetchLoanTransactions = (
-  loanAccountId?: string,
-  limit: number = 10,
-  offset: number = 0,
-) => {
+export const useFetchLoanTransactions = (loanAccountId?: string) => {
   return useQuery({
-    queryKey: ['loanTransactions', loanAccountId, limit, offset],
+    queryKey: ['loanTransactions', loanAccountId],
 
     queryFn: async () => {
       if (!loanAccountId) {
         throw new Error('loanAccountId is required');
       }
 
-      return fetchLoanTransactions(loanAccountId, limit, offset);
+      return fetchLoanTransactions(loanAccountId);
     },
 
     enabled: !!loanAccountId,

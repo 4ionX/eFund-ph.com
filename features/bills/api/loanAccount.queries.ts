@@ -30,14 +30,18 @@ export const GET_LOAN_TRANSACTION = gql`
   query GetLoanTransaction(
     $loan_account_id: UUID!
     $limit: Int!
-    $offset: Int!
+    $after: Cursor
   ) {
     loan_repayment_schedulesCollection(
       filter: { loan_account_id: { eq: $loan_account_id } }
       first: $limit
-      offset: $offset
+      after: $after
       orderBy: { installment_number: AscNullsLast }
     ) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
       edges {
         node {
           id
@@ -51,7 +55,6 @@ export const GET_LOAN_TRANSACTION = gql`
           penalty_amount
           penalty_amount_paid
 
-          # Add loan_ledgersCollection here to fetch the ledgers
           loan_ledgersCollection {
             edges {
               node {

@@ -37,39 +37,45 @@ export const fetchLoanAccounts = async (
   }
 };
 
-export const fetchLoanTransactions = async (
-  loanAccountId: string,
-  limit: number,
-  offset: number,
-) => {
+export const fetchLoanTransactions = async (loanAccountId: string) => {
   try {
     const client = await graphql();
 
-    const res = await client.request(GET_LOAN_TRANSACTION, {
-      loan_account_id: loanAccountId,
-      limit,
-      offset,
-    });
+    const allNodes: any[] = [];
+    let hasNextPage = true;
+    let cursor: string | null = null;
+    const PAGE_SIZE = 30;
 
-    const nodes =
-      res?.loan_repayment_schedulesCollection?.edges?.map((e: any) => {
+    while (hasNextPage) {
+      const res: any = await client.request(GET_LOAN_TRANSACTION, {
+        loan_account_id: loanAccountId,
+        limit: PAGE_SIZE,
+        after: cursor,
+      });
+
+      const collection: any = res?.loan_repayment_schedulesCollection;
+      const edges: any[] = collection?.edges ?? [];
+      const pageInfo: { hasNextPage: boolean; endCursor: string | null } =
+        collection?.pageInfo;
+
+      const nodes = edges.map((e: any) => {
         const schedule = e.node;
-
         return {
           ...schedule,
           loan_ledgers:
             schedule.loan_ledgersCollection?.edges?.map((l: any) => l.node) ??
             [],
         };
-      }) ?? [];
+      });
 
-    const count =
-      res?.loan_repayment_schedulesCollectionAggregate?.aggregate?.count ??
-      nodes.length;
+      allNodes.push(...nodes);
+      hasNextPage = pageInfo?.hasNextPage ?? false;
+      cursor = pageInfo?.endCursor ?? null;
+    }
 
     return {
-      data: nodes,
-      count,
+      data: allNodes,
+      count: allNodes.length,
       error: null,
     };
   } catch (err: any) {
