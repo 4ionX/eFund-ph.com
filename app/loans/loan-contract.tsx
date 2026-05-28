@@ -153,7 +153,39 @@ const LoanContractScreen = () => {
   };
   const handleExport = async () => {
     try {
-      const uri = await viewRef.current.capture();
+      if (!viewRef.current) {
+        console.log('ViewShot ref missing');
+        return;
+      }
+
+      const uri = await viewRef.current.capture?.({
+        snapshotContentContainer: true,
+      });
+
+      console.log('Captured URI:', uri);
+
+      if (!uri) {
+        showAlert('Error', 'Failed to capture contract');
+        return;
+      }
+
+      // WEB
+      if (Platform.OS === 'web') {
+        const link = document.createElement('a');
+        link.href = uri;
+        link.download = `loan-contract-${loanApplicationId}.jpg`;
+        link.click();
+
+        return;
+      }
+
+      // MOBILE
+      const isAvailable = await Sharing.isAvailableAsync();
+
+      if (!isAvailable) {
+        showAlert('Error', 'Sharing is not available on this device');
+        return;
+      }
 
       await Sharing.shareAsync(uri, {
         mimeType: 'image/jpeg',
@@ -161,6 +193,7 @@ const LoanContractScreen = () => {
       });
     } catch (error) {
       console.log('Export error:', error);
+      showAlert('Error', 'Failed to export contract');
     }
   };
   const status = contractInfo?.status;
@@ -179,8 +212,15 @@ const LoanContractScreen = () => {
       />
 
       <ScrollView scrollEnabled={scrollEnabled}>
-        <ViewShot ref={viewRef} options={{ format: 'jpg', quality: 1 }}>
-          <View style={{ position: 'relative' }}>
+        <ViewShot
+          ref={viewRef}
+          options={{
+            format: 'jpg',
+            quality: 0.8,
+            result: 'tmpfile',
+          }}
+        >
+          <View collapsable={false} style={{ position: 'relative' }}>
             {/* ✅ WATERMARK LAYER */}
 
             <ThemedView

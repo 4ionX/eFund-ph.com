@@ -126,6 +126,13 @@ const LoanApplicationForm = ({
       )}
 
       <Field>
+        <ThemedText type="caption">
+          Please make sure that your account name and account number are
+          correct. eFund Admin will not be responsible for failed, delayed, or
+          incorrect disbursements caused by wrong account details provided by
+          the applicant.
+        </ThemedText>
+
         {/* ACCOUNT NAME */}
         <ThemedTextInput
           placeholder="Enter account name"
