@@ -294,6 +294,10 @@ const LoanContractScreen = () => {
                   value={formatCurrency(contractInfo?.serviceFee)}
                 />
                 <Row
+                  label="Notarial Fee"
+                  value={formatCurrency(contractInfo?.notarialFee)}
+                />
+                <Row
                   label={
                     contractInfo?.notes
                       ? `Others (${contractInfo.notes})`
