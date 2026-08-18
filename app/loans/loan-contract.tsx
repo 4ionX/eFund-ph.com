@@ -95,10 +95,17 @@ const LoanContractScreen = () => {
   const contractInfo = loan?.contractInfo;
 
   const hasCoMaker = !!coBorrower;
+  const isDraft = contractInfo?.status === 'Draft';
   const borrowerSigned = !!contractInfo?.signatureUrl;
   const coMakerSigned = !!contractInfo?.coMakerSignatureUrl;
-  const showBorrowerPad = !borrowerSigned;
-  const showCoMakerPad = borrowerSigned && hasCoMaker && !coMakerSigned;
+  // Signing (either signer) is only allowed while the contract is
+  // still Draft — once it's moved on (For Release/Released/
+  // Cancelled), no one can sign it anymore. The backend enforces
+  // this too (set_signed_at() trigger rejects the write outright),
+  // this just keeps the pad from showing at all in that case.
+  const showBorrowerPad = isDraft && !borrowerSigned;
+  const showCoMakerPad =
+    isDraft && borrowerSigned && hasCoMaker && !coMakerSigned;
 
   // ✅ ALWAYS define hooks first
   useEffect(() => {
