@@ -93,7 +93,12 @@ export const useLoanContractForm = () => {
           hasCoMaker,
         });
 
-        showAlert('Success', 'Contract signed successfully!');
+        showAlert(
+          'Success',
+          hasCoMaker
+            ? 'Your signature was saved. Please pass the device to the co-maker to sign.'
+            : 'Contract signed successfully!',
+        );
       } catch (err: any) {
         console.log(err);
         showAlert('Error', err.message || 'Failed to save contract');
