@@ -47,7 +47,11 @@ const LoanContractScreen = () => {
   const viewRef = useRef<any>(null);
   const webSigRef = useRef<any>(null);
 
+  const coMakerRef = useRef<any>(null);
+  const coMakerWebSigRef = useRef<any>(null);
+
   const [signature, setSignature] = useState<string | null>(null);
+  const [coMakerSignature, setCoMakerSignature] = useState<string | null>(null);
   const [scrollEnabled, setScrollEnabled] = useState(true);
 
   const colorScheme = useColorScheme();
@@ -65,14 +69,36 @@ const LoanContractScreen = () => {
     setSignature(null);
   };
 
-  const { handleSave: handleSubmit, isPending } = useLoanContractForm();
+  const handleClearCoMaker = () => {
+    if (Platform.OS === 'web') {
+      coMakerWebSigRef.current?.clear();
+    } else {
+      coMakerRef.current?.clearSignature();
+    }
+    setCoMakerSignature(null);
+  };
+
+  const {
+    handleSave: handleSubmit,
+    handleSaveCoMaker: handleSubmitCoMaker,
+    isPending,
+  } = useLoanContractForm();
 
   const { getSignedUrl } = useFileUpload();
   const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
+  const [coMakerSignatureUrl, setCoMakerSignatureUrl] = useState<string | null>(
+    null,
+  );
 
   const personal = loan?.personalInfo;
   const coBorrower = loan?.coBorrowers;
   const contractInfo = loan?.contractInfo;
+
+  const hasCoMaker = !!coBorrower;
+  const borrowerSigned = !!contractInfo?.signatureUrl;
+  const coMakerSigned = !!contractInfo?.coMakerSignatureUrl;
+  const showBorrowerPad = !borrowerSigned;
+  const showCoMakerPad = borrowerSigned && hasCoMaker && !coMakerSigned;
 
   // ✅ ALWAYS define hooks first
   useEffect(() => {
@@ -99,12 +125,36 @@ const LoanContractScreen = () => {
     };
   }, [getSignedUrl, loan?.contractInfo.signatureUrl]);
 
+  useEffect(() => {
+    let mounted = true;
+
+    const loadCoMakerSignature = async () => {
+      if (!loan?.contractInfo?.coMakerSignatureUrl) return;
+
+      try {
+        const url = await getSignedUrl(loan.contractInfo.coMakerSignatureUrl);
+
+        if (mounted) {
+          setCoMakerSignatureUrl(url);
+        }
+      } catch (err) {
+        console.log('Failed to load co-maker signature', err);
+      }
+    };
+
+    loadCoMakerSignature();
+
+    return () => {
+      mounted = false;
+    };
+  }, [getSignedUrl, loan?.contractInfo.coMakerSignatureUrl]);
+
   // ❗ saka ka mag early return
   if (isLoading || !loan) {
     return <LoadingOverlay />;
   }
 
-  const handleSave = () => {
+  const handleSaveBorrower = () => {
     if (Platform.OS === 'web') {
       const sig = webSigRef.current?.toDataURL();
 
@@ -116,11 +166,30 @@ const LoanContractScreen = () => {
       const cleanBase64 = sig.replace(/^data:image\/\w+;base64,/, '');
 
       setSignature(sig);
-      handleSubmit(cleanBase64, contractInfo?.id);
+      handleSubmit(cleanBase64, contractInfo?.id, hasCoMaker);
       return;
     }
 
     ref.current?.readSignature();
+  };
+
+  const handleSaveCoMaker = () => {
+    if (Platform.OS === 'web') {
+      const sig = coMakerWebSigRef.current?.toDataURL();
+
+      if (!sig) {
+        showAlert('Error', 'Please provide a signature');
+        return;
+      }
+
+      const cleanBase64 = sig.replace(/^data:image\/\w+;base64,/, '');
+
+      setCoMakerSignature(sig);
+      handleSubmitCoMaker(cleanBase64, contractInfo?.id);
+      return;
+    }
+
+    coMakerRef.current?.readSignature();
   };
 
   const fullName = [
@@ -438,6 +507,21 @@ const LoanContractScreen = () => {
               </ThemedText>
             </ThemedView>
             <ThemedView style={styles.customerSign}>
+              {coMakerSignatureUrl ? (
+                <EFImage
+                  source={{ uri: coMakerSignatureUrl }}
+                  style={styles.signatureImage}
+                  contentFit="contain"
+                  transition={200}
+                />
+              ) : coMakerSignature ? (
+                <EFImage
+                  source={{ uri: coMakerSignature }}
+                  style={styles.signatureImage}
+                  contentFit="contain"
+                  transition={200}
+                />
+              ) : null}
               <ThemedText type="defaultSemiBold">
                 {coBorrowerFullName.toUpperCase()}
               </ThemedText>
@@ -448,9 +532,11 @@ const LoanContractScreen = () => {
           </View>
         </ViewShot>
         {/* SIGN PAD */}
-        {!contractInfo?.signatureUrl && (
+        {showBorrowerPad && (
           <>
-            <ThemedText style={styles.signLabel}>Please sign below:</ThemedText>
+            <ThemedText style={styles.signLabel}>
+              Please sign below (Borrower):
+            </ThemedText>
 
             {Platform.OS === 'web' ? (
               <View
@@ -484,7 +570,7 @@ const LoanContractScreen = () => {
                   onOK={(sig) => {
                     setSignature(sig);
 
-                    handleSubmit(sig, contractInfo?.id);
+                    handleSubmit(sig, contractInfo?.id, hasCoMaker);
                   }}
                 />
               </ThemedView>
@@ -498,12 +584,75 @@ const LoanContractScreen = () => {
             <ThemedView style={styles.actions}>
               <AnimatedButton
                 label={isPending ? 'Submitting...' : 'Submit Application'}
-                onPress={handleSave}
+                onPress={handleSaveBorrower}
                 disabled={isPending}
               />
               <AnimatedButton
                 label="Cancel Application"
                 onPress={handleClear}
+              />
+            </ThemedView>
+          </>
+        )}
+
+        {showCoMakerPad && (
+          <>
+            <ThemedText style={styles.signLabel}>
+              Please sign below (Co-Maker):
+            </ThemedText>
+
+            {Platform.OS === 'web' ? (
+              <View
+                style={{
+                  height: 200,
+                  borderWidth: 1,
+                  overflow: 'hidden',
+                  backgroundColor: '#fff',
+                  margin: 16,
+                }}
+              >
+                <SignatureCanvas
+                  ref={coMakerWebSigRef}
+                  penColor="black"
+                  canvasProps={{
+                    style: {
+                      width: '100%',
+                      height: '200px',
+                      touchAction: 'none',
+                    },
+                  }}
+                />
+              </View>
+            ) : (
+              <ThemedView style={[styles.signatureContainer, { borderColor }]}>
+                <SignatureScreen
+                  ref={coMakerRef}
+                  autoClear={false}
+                  onBegin={() => setScrollEnabled(false)}
+                  onEnd={() => setScrollEnabled(true)}
+                  onOK={(sig) => {
+                    setCoMakerSignature(sig);
+
+                    handleSubmitCoMaker(sig, contractInfo?.id);
+                  }}
+                />
+              </ThemedView>
+            )}
+
+            {/* ACTION */}
+            <ThemedView style={styles.actions}>
+              <AnimatedButton label="Clear" onPress={handleClearCoMaker} />
+            </ThemedView>
+
+            <ThemedView style={styles.actions}>
+              <AnimatedButton
+                label={isPending ? 'Submitting...' : 'Submit Application'}
+                onPress={handleSaveCoMaker}
+                disabled={isPending}
+              />
+              <AnimatedButton
+                label="Cancel Application"
+                onPress={handleClearCoMaker}
               />
             </ThemedView>
           </>

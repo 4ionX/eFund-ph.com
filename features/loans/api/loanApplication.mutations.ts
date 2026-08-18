@@ -50,3 +50,23 @@ export const updateLoanContract = async (
 
   return data;
 };
+
+export const updateCoMakerSignature = async (
+  signatureUrl: string,
+  contractId: string,
+) => {
+  const { data, error } = await supabaseClient
+    .from('loan_contracts')
+    .update({
+      co_maker_signature_url: signatureUrl,
+    })
+    .eq('id', contractId)
+    .select('*')
+    .single();
+
+  if (error || !data) {
+    throw new Error(error?.message ?? 'Failed to update contract');
+  }
+
+  return data;
+};

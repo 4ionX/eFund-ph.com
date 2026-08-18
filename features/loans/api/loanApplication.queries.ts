@@ -74,6 +74,7 @@ export const GET_LOAN_CONTRACT = gql`
           status
           repayment_frequency
           signature_url
+          co_maker_signature_url
           created_at
           updated_at
         }

@@ -22,8 +22,12 @@ export const useFileUpload = () => {
     input: string,
     userId: string,
     loanContractId: string,
+    signer: 'borrower' | 'coMaker' = 'borrower',
   ) => {
-    const filePath = `${userId}/${loanContractId}.jpg`;
+    const filePath =
+      signer === 'coMaker'
+        ? `${userId}/${loanContractId}-comaker.jpg`
+        : `${userId}/${loanContractId}.jpg`;
 
     let base64: string;
 
